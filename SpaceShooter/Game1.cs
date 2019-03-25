@@ -31,7 +31,7 @@ namespace SpaceShooter
             // TODO: Add your initialization logic here
 
             //Create player
-            m_Player = new Player(new Rectangle(100, 100, 64, 64));
+            m_Player = new Player(new Rectangle(100, 100, 64, 64), 0f);
 
             base.Initialize();
         }
@@ -102,6 +102,14 @@ namespace SpaceShooter
             if (Keyboard.GetState().IsKeyDown(Keys.S))
             {
                 m_Player.SetPosition(m_Player.GetPosition() + new Vector2(0, 10));
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.D))
+            {
+                m_Player.SetRotation(m_Player.GetRotation() + 0.1f);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.A))
+            {
+                m_Player.SetRotation(m_Player.GetRotation() - 0.1f);
             }
         }
     }

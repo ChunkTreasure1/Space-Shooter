@@ -1,7 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+
+using System;
 using SpaceShooter.Gameplay.Player;
+using SpaceShooter.Gameplay;
 
 namespace SpaceShooter
 {
@@ -13,6 +16,7 @@ namespace SpaceShooter
         GraphicsDeviceManager m_Graphics;
         SpriteBatch m_SpriteBatch;
         Player m_Player;
+        Texture2D m_BulletTexture;
 
         public Game1()
         {
@@ -31,6 +35,10 @@ namespace SpaceShooter
             // TODO: Add your initialization logic here
 
             //Create player
+            m_Graphics.PreferredBackBufferWidth = 1280;
+            m_Graphics.PreferredBackBufferHeight = 720;
+            m_Graphics.ApplyChanges();
+
             m_Player = new Player(new Rectangle(100, 100, 64, 64), 0f);
 
             base.Initialize();
@@ -47,6 +55,7 @@ namespace SpaceShooter
 
             //Add textures
             m_Player.SetTexture(Content.Load<Texture2D>("Images/spaceship"));
+            m_BulletTexture = Content.Load<Texture2D>("Images/bullet");
 
             // TODO: use this.Content to load your game content here
         }
@@ -68,8 +77,8 @@ namespace SpaceShooter
         protected override void Update(GameTime gameTime)
         {
             // TODO: Add your update logic here
-            GetInput();
-
+            UpdatePosition(gameTime);
+            GetInput(gameTime);
             base.Update(gameTime);
         }
 
@@ -90,26 +99,47 @@ namespace SpaceShooter
             base.Draw(gameTime);
         }
 
-        private void GetInput()
+        //Gets the players input
+        private void GetInput(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
             if (Keyboard.GetState().IsKeyDown(Keys.W))
             {
-                m_Player.SetPosition(m_Player.GetPosition() + new Vector2(0, -10));
+                Vector2 dir = new Vector2((float)Math.Cos(m_Player.GetRotation()),
+                                          (float)Math.Sin(m_Player.GetRotation()));
+                dir.Normalize();
+
+                m_Player.SetPosition(m_Player.GetPosition() + dir * 10);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.S))
             {
-                m_Player.SetPosition(m_Player.GetPosition() + new Vector2(0, 10));
+                Vector2 dir = new Vector2((float)Math.Cos(m_Player.GetRotation()),
+                                         (float)Math.Sin(m_Player.GetRotation()));
+                dir.Normalize();
+                m_Player.SetPosition(m_Player.GetPosition() - dir * 10);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.D))
             {
-                m_Player.SetRotation(m_Player.GetRotation() + 0.1f);
+                m_Player.SetRotation(MathHelper.ToDegrees(m_Player.GetRotation()) + 10f);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.A))
             {
-                m_Player.SetRotation(m_Player.GetRotation() - 0.1f);
+                m_Player.SetRotation(MathHelper.ToDegrees(m_Player.GetRotation()) - 10f);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Space))
+            {
+                m_Player.GetBullets().Add(new Bullet(new Rectangle(100, 100, 64, 64), 0f, m_BulletTexture));
+            }
+        }
+
+        //Updates the position of bullets etc
+        private void UpdatePosition(GameTime gameTime)
+        {
+            for (int i = 0; i < m_Player.GetBullets().Count; i++)
+            {
+                m_Player.GetBullets()[i].Move();
             }
         }
     }

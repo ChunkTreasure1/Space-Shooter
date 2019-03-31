@@ -42,7 +42,7 @@ namespace SpaceShooter
             m_Graphics.PreferredBackBufferHeight = 720;
             m_Graphics.ApplyChanges();
 
-            m_Player = new Player(new Rectangle(100, 100, 64, 64), 0f);
+            m_Player = new Player(new Vector2(100, 100), 0, 1, null);
 
             base.Initialize();
         }
@@ -110,26 +110,19 @@ namespace SpaceShooter
 
             if (Keyboard.GetState().IsKeyDown(Keys.W))
             {
-                Vector2 dir = new Vector2((float)Math.Cos(m_Player.GetRotation()),
-                                          (float)Math.Sin(m_Player.GetRotation()));
-                dir.Normalize();
-
-                m_Player.SetPosition(m_Player.GetPosition() + dir * m_PlayerSpeed);
+                m_Player.Move(m_PlayerSpeed, 1);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.S))
             {
-                Vector2 dir = new Vector2((float)Math.Cos(m_Player.GetRotation()),
-                                         (float)Math.Sin(m_Player.GetRotation()));
-                dir.Normalize();
-                m_Player.SetPosition(m_Player.GetPosition() - dir * m_PlayerSpeed);
+                m_Player.Move(-m_PlayerSpeed, 1);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.D))
             {
-                m_Player.SetRotation(MathHelper.ToDegrees(m_Player.GetRotation()) + 10f);
+                m_Player.SetRotation(MathHelper.ToDegrees(m_Player.GetRotation()) + 5f);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.A))
             {
-                m_Player.SetRotation(MathHelper.ToDegrees(m_Player.GetRotation()) - 10f);
+                m_Player.SetRotation(MathHelper.ToDegrees(m_Player.GetRotation()) - 5f);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && !m_ShootPressed)
             {
@@ -147,7 +140,7 @@ namespace SpaceShooter
         {
             for (int i = 0; i < m_Player.GetBullets().Count; i++)
             {
-                m_Player.GetBullets()[i].Move(m_PlayerSpeed);
+                m_Player.GetBullets()[i].Move(m_PlayerSpeed, 2);
             }
         }
     }

@@ -1,12 +1,14 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using System;
+
 namespace SpaceShooter.Gameplay
 {
     class Bullet
     {
         private Vector2 m_Position;
-        private Vector2 m_Size;
+        private float m_Size;
 
         private Texture2D m_Texture;
         private float m_Rotation;
@@ -20,21 +22,23 @@ namespace SpaceShooter.Gameplay
         public void SetTexture(Texture2D texture) { m_Texture = texture; }
         public void SetRotation(float rot) { m_Rotation = MathHelper.ToRadians(rot); }
 
-        public Bullet(Rectangle rect, float rotation, Texture2D texture)
+        public Bullet(Vector2 pos, float rotation, float scale, Texture2D texture)
         {
-            m_Position.X = rect.X;
-            m_Position.Y = rect.Y;
+            m_Position.X = pos.X;
+            m_Position.Y = pos.Y;
 
-            m_Size.X = rect.Height;
-            m_Size.Y = rect.Width;
+            m_Size = scale;
 
             m_Rotation = rotation;
             m_Texture = texture;
         }
 
-        public void Move()
+        public void Move(float speed)
         {
-
+            Vector2 dir = new Vector2((float)Math.Cos(GetRotation()),
+                                      (float)Math.Sin(GetRotation()));
+            dir.Normalize();
+            SetPosition(GetPosition() + dir * speed * 2);
         }
 
         public void Draw(ref SpriteBatch spriteBatch)
@@ -42,7 +46,7 @@ namespace SpaceShooter.Gameplay
             Rectangle rect = new Rectangle(0, 0, m_Texture.Width, m_Texture.Height);
             Vector2 origin = new Vector2(m_Texture.Width / 2, m_Texture.Height / 2);
 
-            spriteBatch.Draw(m_Texture, m_Position, rect, Color.White, m_Rotation, origin, 1, SpriteEffects.None, 1);
+            spriteBatch.Draw(m_Texture, m_Position, rect, Color.White, m_Rotation, origin, m_Size, SpriteEffects.None, 1);
         }
     }
 }

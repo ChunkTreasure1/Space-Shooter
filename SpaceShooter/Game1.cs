@@ -13,10 +13,13 @@ namespace SpaceShooter
     /// </summary>
     public class Game1 : Game
     {
-        GraphicsDeviceManager m_Graphics;
-        SpriteBatch m_SpriteBatch;
-        Player m_Player;
-        Texture2D m_BulletTexture;
+        private GraphicsDeviceManager m_Graphics;
+        private SpriteBatch m_SpriteBatch;
+        private Player m_Player;
+        private Texture2D m_BulletTexture;
+
+        private bool m_ShootPressed = false;
+        private float m_PlayerSpeed = 10f;
 
         public Game1()
         {
@@ -111,14 +114,14 @@ namespace SpaceShooter
                                           (float)Math.Sin(m_Player.GetRotation()));
                 dir.Normalize();
 
-                m_Player.SetPosition(m_Player.GetPosition() + dir * 10);
+                m_Player.SetPosition(m_Player.GetPosition() + dir * m_PlayerSpeed);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.S))
             {
                 Vector2 dir = new Vector2((float)Math.Cos(m_Player.GetRotation()),
                                          (float)Math.Sin(m_Player.GetRotation()));
                 dir.Normalize();
-                m_Player.SetPosition(m_Player.GetPosition() - dir * 10);
+                m_Player.SetPosition(m_Player.GetPosition() - dir * m_PlayerSpeed);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.D))
             {
@@ -128,9 +131,14 @@ namespace SpaceShooter
             {
                 m_Player.SetRotation(MathHelper.ToDegrees(m_Player.GetRotation()) - 10f);
             }
-            if (Keyboard.GetState().IsKeyDown(Keys.Space))
+            if (Keyboard.GetState().IsKeyDown(Keys.Space) && !m_ShootPressed)
             {
-                m_Player.GetBullets().Add(new Bullet(new Rectangle(100, 100, 64, 64), 0f, m_BulletTexture));
+                m_ShootPressed = true;
+                m_Player.GetBullets().Add(new Bullet(new Vector2(m_Player.GetPosition().X, m_Player.GetPosition().Y), m_Player.GetRotation(), 0.5f, m_BulletTexture));
+            }
+            if (Keyboard.GetState().IsKeyUp(Keys.Space) && m_ShootPressed)
+            {
+                m_ShootPressed = false;
             }
         }
 
@@ -139,7 +147,7 @@ namespace SpaceShooter
         {
             for (int i = 0; i < m_Player.GetBullets().Count; i++)
             {
-                m_Player.GetBullets()[i].Move();
+                m_Player.GetBullets()[i].Move(m_PlayerSpeed);
             }
         }
     }

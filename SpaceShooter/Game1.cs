@@ -2,8 +2,9 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-using System;
+using System.Collections.Generic;
 using SpaceShooter.Gameplay.Player;
+using SpaceShooter.Gameplay.Enemies;
 using SpaceShooter.Gameplay;
 
 namespace SpaceShooter
@@ -16,7 +17,10 @@ namespace SpaceShooter
         private GraphicsDeviceManager m_Graphics;
         private SpriteBatch m_SpriteBatch;
         private Player m_Player;
+
+        private List<Enemy> m_Enemies = new List<Enemy>();
         private Texture2D m_BulletTexture;
+        private Texture2D m_EnemyTexture;
 
         private bool m_ShootPressed = false;
         private float m_PlayerSpeed = 10f;
@@ -59,6 +63,7 @@ namespace SpaceShooter
             //Add textures
             m_Player.SetTexture(Content.Load<Texture2D>("Images/spaceship"));
             m_BulletTexture = Content.Load<Texture2D>("Images/bullet");
+            m_EnemyTexture = Content.Load<Texture2D>("Images/spaceship");
 
             // TODO: use this.Content to load your game content here
         }
@@ -80,7 +85,7 @@ namespace SpaceShooter
         protected override void Update(GameTime gameTime)
         {
             // TODO: Add your update logic here
-            UpdatePosition(gameTime);
+            UpdateEntities(gameTime);
             GetInput(gameTime);
             base.Update(gameTime);
         }
@@ -97,6 +102,14 @@ namespace SpaceShooter
 
             //Draw the player
             m_Player.Draw(ref m_SpriteBatch);
+
+            if (m_Enemies.Count > 0)
+            {
+                for (int i = 0; i < m_Enemies.Count; i++)
+                {
+                    m_Enemies[i].Draw(ref m_SpriteBatch);
+                }
+            }
 
             m_SpriteBatch.End();
             base.Draw(gameTime);
@@ -127,20 +140,35 @@ namespace SpaceShooter
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && !m_ShootPressed)
             {
                 m_ShootPressed = true;
-                m_Player.GetBullets().Add(new Bullet(new Vector2(m_Player.GetPosition().X, m_Player.GetPosition().Y), m_Player.GetRotation(), 0.5f, m_BulletTexture));
+                m_Player.GetBullets().Add(new Bullet(new Vector2(m_Player.GetPosition().X, m_Player.GetPosition().Y), m_Player.GetRotation(), 0.5f, m_BulletTexture, m_PlayerSpeed));
             }
             if (Keyboard.GetState().IsKeyUp(Keys.Space) && m_ShootPressed)
             {
                 m_ShootPressed = false;
             }
+            if (Keyboard.GetState().IsKeyDown(Keys.F))
+            {
+                m_Enemies.Add(new Enemy(new Vector2(100, 100), 0, 1, m_BulletTexture, 6));
+            }
         }
 
-        //Updates the position of bullets etc
-        private void UpdatePosition(GameTime gameTime)
+        private void UpdateEntities(GameTime gameTime)
         {
-            for (int i = 0; i < m_Player.GetBullets().Count; i++)
+            if (m_Enemies.Count > 0)
             {
-                m_Player.GetBullets()[i].Move(m_PlayerSpeed, 2);
+                for (int i = 0; i < m_Enemies.Count; i++)
+                {
+                    m_Enemies[i].Update(gameTime);
+                    m_Enemies[i].SetPlayerPosition(m_Player.GetPosition());
+                }
+            }
+
+            if (m_Player.GetBullets().Count > 0)
+            {
+                for (int i = 0; i < m_Player.GetBullets().Count; i++)
+                {
+                    m_Player.GetBullets()[i].Update(gameTime);
+                }
             }
         }
     }

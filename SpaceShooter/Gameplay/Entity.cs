@@ -31,21 +31,23 @@ namespace SpaceShooter.Gameplay
             m_Rotation = rotation;
             m_Texture = texture;
         }
-
-        public void Move(float speed, float mul)
+        public virtual void Move(float speed, float mul)
         {
             Vector2 dir = new Vector2((float)Math.Cos(GetRotation()),
                                       (float)Math.Sin(GetRotation()));
             dir.Normalize();
             SetPosition(GetPosition() + dir * speed * mul);
         }
-
         public virtual void Draw(ref SpriteBatch spriteBatch)
         {
             Rectangle rect = new Rectangle(0, 0, m_Texture.Width, m_Texture.Height);
             Vector2 origin = new Vector2(m_Texture.Width / 2, m_Texture.Height / 2);
 
             spriteBatch.Draw(m_Texture, m_Position, rect, Color.White, m_Rotation, origin, m_Scale, SpriteEffects.None, 1);
+        }
+        public virtual void Update(GameTime gameTime)
+        {
+
         }
     }
 }

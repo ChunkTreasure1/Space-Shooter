@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using SpaceShooter.Gameplay.Player;
 using SpaceShooter.Gameplay.Enemies;
 using SpaceShooter.Gameplay;
+using System;
 
 namespace SpaceShooter
 {
@@ -24,6 +25,7 @@ namespace SpaceShooter
 
         private bool m_ShootPressed = false;
         private float m_PlayerSpeed = 10f;
+        private SpriteFont m_Font;
 
         public Game1()
         {
@@ -46,7 +48,7 @@ namespace SpaceShooter
             m_Graphics.PreferredBackBufferHeight = 720;
             m_Graphics.ApplyChanges();
 
-            m_Player = new Player(new Vector2(100, 100), 0, 1, null);
+            m_Player = new Player(new Vector2(100, 100), 0, 1, null, new Rectangle(0, 0, 0, 0));
 
             base.Initialize();
         }
@@ -65,7 +67,15 @@ namespace SpaceShooter
             m_BulletTexture = Content.Load<Texture2D>("Images/bullet");
             m_EnemyTexture = Content.Load<Texture2D>("Images/spaceship");
 
-            // TODO: use this.Content to load your game content here
+            //Fonts
+            m_Font = Content.Load<SpriteFont>("Fonts/Roboto");
+
+            m_Player.SetRectangle(new Rectangle((int)m_Player.GetPosition().X, 
+                                                (int)m_Player.GetPosition().Y, 
+                                                m_Player.GetTexture().Width, 
+                                                m_Player.GetTexture().Height));
+
+            m_Player.LoadTextureData();
         }
 
         /// <summary>
@@ -102,14 +112,15 @@ namespace SpaceShooter
 
             //Draw the player
             m_Player.Draw(ref m_SpriteBatch);
-
-            if (m_Enemies.Count > 0)
+           if (m_Enemies.Count > 0)
             {
                 for (int i = 0; i < m_Enemies.Count; i++)
                 {
                     m_Enemies[i].Draw(ref m_SpriteBatch);
                 }
             }
+
+            m_SpriteBatch.DrawString(m_Font, "FPS: " + 1 / (float)gameTime.ElapsedGameTime.TotalSeconds, new Vector2(100, 100), Color.White);
 
             m_SpriteBatch.End();
             base.Draw(gameTime);
@@ -140,7 +151,18 @@ namespace SpaceShooter
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && !m_ShootPressed)
             {
                 m_ShootPressed = true;
-                m_Player.GetBullets().Add(new Bullet(new Vector2(m_Player.GetPosition().X, m_Player.GetPosition().Y), m_Player.GetRotation(), 0.5f, m_BulletTexture, m_PlayerSpeed));
+                m_Player.GetBullets().Add(new Bullet(new Vector2(m_Player.GetPosition().X, 
+                                                                 m_Player.GetPosition().Y), 
+                                                     m_Player.GetRotation(), 
+                                                     0.5f, 
+                                                     m_BulletTexture, 
+                                                     m_PlayerSpeed,
+                                                     new Rectangle((int)m_Player.GetPosition().X, 
+                                                                   (int)m_Player.GetPosition().Y, 
+                                                                   m_BulletTexture.Width, 
+                                                                   m_BulletTexture.Height)));
+
+                m_Player.GetBullets()[m_Player.GetBullets().Count - 1].LoadTextureData();
             }
             if (Keyboard.GetState().IsKeyUp(Keys.Space) && m_ShootPressed)
             {
@@ -148,10 +170,20 @@ namespace SpaceShooter
             }
             if (Keyboard.GetState().IsKeyDown(Keys.F))
             {
-                m_Enemies.Add(new Enemy(new Vector2(100, 100), 0, 1, m_BulletTexture, 6));
+                m_Enemies.Add(new Enemy(new Vector2(100, 100), 
+                              0, 
+                              1, 
+                              m_BulletTexture, 
+                              6, 
+                              new Rectangle(100, 100, 
+                                            m_BulletTexture.Width, 
+                                            m_BulletTexture.Height)));
+
+                m_Enemies[m_Enemies.Count - 1].LoadTextureData();
             }
         }
 
+        //Updates all the entities
         private void UpdateEntities(GameTime gameTime)
         {
             if (m_Enemies.Count > 0)
@@ -170,6 +202,40 @@ namespace SpaceShooter
                     m_Player.GetBullets()[i].Update(gameTime);
                 }
             }
+
+            for (int i = 0; i < m_Enemies.Count; i++)
+            {
+                if (IntersectsPixel(m_Player.GetRectangle(), m_Player.Get))
+                {
+
+                }
+            }
+        }
+
+        static bool IntersectsPixel(Rectangle rect1, Color[] data1,
+                                    Rectangle rect2, Color[] data2)
+        {
+            int top = Math.Max(rect1.Top, rect2.Top);
+            int bottom = Math.Min(rect1.Bottom, rect2.Bottom);
+
+            int left = Math.Max(rect1.Left, rect2.Left);
+            int right = Math.Min(rect1.Right, rect2.Right);
+
+            for (int y = top; y < bottom; y++)
+            {
+                for (int x = left; x < right; x++)
+                {
+                    Color color1 = data1[(x - rect1.Left) + (y - rect1.Top) * rect1.Width];
+                    Color color2 = data2[(x - rect2.Left) + (y - rect2.Top) * rect2.Width];
+
+                    if (color1.A != 0 && color2.A != 0)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

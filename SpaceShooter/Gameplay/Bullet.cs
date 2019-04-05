@@ -1,13 +1,14 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace SpaceShooter.Gameplay
 {
     public class Bullet : Entity
     {
         private float m_Speed;
-        public Bullet(Vector2 pos, float rotation, float scale, Texture2D texture, float speed) : 
-            base(pos, rotation, scale, texture)
+        public Bullet(Vector2 pos, float rotation, float scale, Texture2D texture, float speed, Rectangle rect) : 
+            base(pos, rotation, scale, texture, rect)
         {
             m_Position.X = pos.X;
             m_Position.Y = pos.Y;
@@ -16,12 +17,24 @@ namespace SpaceShooter.Gameplay
             m_Rotation = rotation;
             m_Texture = texture;
             m_Speed = speed;
+
+            m_Rectangle = rect;
         }
 
         public override void Update(GameTime gameTime)
         {
             Move(m_Speed, 2);
             base.Update(gameTime);
+        }
+
+        public override void Move(float speed, float mul)
+        {
+            Vector2 dir = new Vector2((float)Math.Cos(GetRotation()),
+                          (float)Math.Sin(GetRotation()));
+            dir.Normalize();
+            SetPosition(GetPosition() + dir * speed * mul);
+
+            base.Move(speed, mul);
         }
     }
 }

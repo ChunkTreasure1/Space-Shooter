@@ -8,8 +8,8 @@ namespace SpaceShooter.Gameplay.Enemies
         private float m_Speed;
         private Vector2 m_PlayerPosition;
 
-        public Enemy(Vector2 pos, float rotation, float scale, Texture2D texture, float speed) :
-            base(pos, rotation, scale, texture)
+        public Enemy(Vector2 pos, float rotation, float scale, Texture2D texture, float speed, Rectangle rect) :
+            base(pos, rotation, scale, texture, rect)
         {
             m_Position.X = pos.X;
             m_Position.Y = pos.Y;

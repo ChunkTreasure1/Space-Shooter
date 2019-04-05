@@ -2,17 +2,19 @@
 using Microsoft.Xna.Framework.Graphics;
 
 using System.Collections.Generic;
+using System;
 
 namespace SpaceShooter.Gameplay.Player
 {
     public class Player : Entity
     {
+
         private List<Bullet> m_Bullets = new List<Bullet>();
 
         public List<Bullet> GetBullets() { return m_Bullets; }
 
-        public Player(Vector2 pos, float rotation, float scale, Texture2D texture) :
-            base(pos, rotation, scale, texture)
+        public Player(Vector2 pos, float rotation, float scale, Texture2D texture, Rectangle rect) :
+            base(pos, rotation, scale, texture, rect)
         {
             m_Position.X = pos.X;
             m_Position.Y = pos.Y;
@@ -20,6 +22,7 @@ namespace SpaceShooter.Gameplay.Player
             m_Scale = scale;
             m_Rotation = rotation;
             m_Texture = texture;
+            m_Rectangle = rect;
         }
 
         //Overrides the drawing of the player
@@ -37,6 +40,15 @@ namespace SpaceShooter.Gameplay.Player
                     m_Bullets[i].Draw(ref spriteBatch);
                 }
             }
+        }
+
+        public override void Move(float speed, float mul)
+        {
+            Vector2 dir = new Vector2((float)Math.Cos(GetRotation()),
+                          (float)Math.Sin(GetRotation()));
+            dir.Normalize();
+            SetPosition(GetPosition() + dir * speed * mul);
+            base.Move(speed, mul);
         }
     }
 }

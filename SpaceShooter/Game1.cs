@@ -26,6 +26,7 @@ namespace SpaceShooter
         private bool m_ShootPressed = false;
         private float m_PlayerSpeed = 10f;
         private SpriteFont m_Font;
+        private bool m_Collision = false;
 
         public Game1()
         {
@@ -48,7 +49,7 @@ namespace SpaceShooter
             m_Graphics.PreferredBackBufferHeight = 720;
             m_Graphics.ApplyChanges();
 
-            m_Player = new Player(new Vector2(100, 100), 0, 1, null, new Rectangle(0, 0, 0, 0));
+            m_Player = new Player(new Vector2(100, 100), 0, 0.5f, null, new Rectangle(0, 0, 0, 0));
 
             base.Initialize();
         }
@@ -63,9 +64,9 @@ namespace SpaceShooter
             m_SpriteBatch = new SpriteBatch(GraphicsDevice);
 
             //Add textures
-            m_Player.SetTexture(Content.Load<Texture2D>("Images/spaceship"));
+            m_Player.SetTexture(Content.Load<Texture2D>("Images/PlayerShip"));
             m_BulletTexture = Content.Load<Texture2D>("Images/bullet");
-            m_EnemyTexture = Content.Load<Texture2D>("Images/spaceship");
+            m_EnemyTexture = Content.Load<Texture2D>("Images/EnemyShip");
 
             //Fonts
             m_Font = Content.Load<SpriteFont>("Fonts/Roboto");
@@ -106,7 +107,14 @@ namespace SpaceShooter
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
+            if (m_Collision)
+            {
+                GraphicsDevice.Clear(Color.Red);
+            }
+            else
+            {
+                GraphicsDevice.Clear(Color.Black);
+            }
 
             m_SpriteBatch.Begin();
 
@@ -171,13 +179,8 @@ namespace SpaceShooter
             if (Keyboard.GetState().IsKeyDown(Keys.F))
             {
                 m_Enemies.Add(new Enemy(new Vector2(100, 100), 
-                              0, 
-                              1, 
-                              m_BulletTexture, 
-                              6, 
-                              new Rectangle(100, 100, 
-                                            m_BulletTexture.Width, 
-                                            m_BulletTexture.Height)));
+                              0, 0.5f, m_EnemyTexture, 6, 
+                              new Rectangle(100, 100, m_EnemyTexture.Width, m_EnemyTexture.Height)));
 
                 m_Enemies[m_Enemies.Count - 1].LoadTextureData();
             }
@@ -186,6 +189,7 @@ namespace SpaceShooter
         //Updates all the entities
         private void UpdateEntities(GameTime gameTime)
         {
+            //Update the enemies
             if (m_Enemies.Count > 0)
             {
                 for (int i = 0; i < m_Enemies.Count; i++)
@@ -195,19 +199,54 @@ namespace SpaceShooter
                 }
             }
 
+            //Update the bullets
             if (m_Player.GetBullets().Count > 0)
             {
                 for (int i = 0; i < m_Player.GetBullets().Count; i++)
                 {
-                    m_Player.GetBullets()[i].Update(gameTime);
+                    if (m_Player.GetBullets()[i].GetPosition().X > m_Graphics.PreferredBackBufferWidth || m_Player.GetBullets()[i].GetPosition().X < 0 ||
+                        m_Player.GetBullets()[i].GetPosition().Y > m_Graphics.PreferredBackBufferHeight || m_Player.GetBullets()[i].GetPosition().Y < 0)
+                    {
+                        m_Player.GetBullets().RemoveAt(i);
+                        i--;
+                    }
+                    else
+                    {
+                        m_Player.GetBullets()[i].Update(gameTime);
+                    }
                 }
             }
 
+            //Check for enemy collision
             for (int i = 0; i < m_Enemies.Count; i++)
             {
-                if (IntersectsPixel(m_Player.GetRectangle(), m_Player.Get))
+                if (IntersectsPixel(m_Player.GetRectangle(), m_Player.GetTextureData(), m_Enemies[i].GetRectangle(), m_Enemies[i].GetTextureData()))
                 {
+                    m_Collision = true;
+                }
+                else
+                {
+                    m_Collision = false;
+                }
+            }
 
+            //Check for bullet collision
+            for (int i = 0; i < m_Player.GetBullets().Count; i++)
+            {
+                if (m_Player.GetBullets().Count == 0)
+                {
+                    break;
+                }
+                for (int j = 0; j < m_Enemies.Count; j++)
+                {
+                    if (IntersectsPixel(m_Player.GetBullets()[i].GetRectangle(), m_Player.GetBullets()[i].GetTextureData(), m_Enemies[j].GetRectangle(), m_Enemies[j].GetTextureData()))
+                    {
+                        m_Collision = true;
+                    }
+                    else
+                    {
+                        m_Collision = false;
+                    }
                 }
             }
         }

@@ -20,18 +20,6 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/File.spritefont;Fonts/Roboto.spritefont
 
-#begin Images/kisspng-spacecraft-clip-art-spaceship-png-file-5a7852b5a11907.5780419415178349336599.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Images/kisspng-spacecraft-clip-art-spaceship-png-file-5a7852b5a11907.5780419415178349336599.png;Images/spacecraft.png
-
 #begin Images/new_bullet.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -44,7 +32,7 @@
 /processorParam:TextureFormat=Color
 /build:Images/new_bullet.png;Images/bullet.png
 
-#begin Images/spaceship.png
+#begin Images/ship1.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -54,5 +42,17 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Images/spaceship.png
+/build:Images/ship1.png;Images/PlayerShip.png
+
+#begin Images/ship5.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/ship5.png;Images/EnemyShip.png
 

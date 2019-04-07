@@ -25,7 +25,7 @@ namespace SpaceShooter.Gameplay
         public Color[] GetTextureData() { return m_TextureData; }
 
         //Setting
-        public void SetPosition(Vector2 pos) { m_Position = pos; }
+        public void SetPosition(Vector2 pos) { m_Position = pos; m_Rectangle.X = (int)pos.X; m_Rectangle.Y = (int)pos.Y; }
         public void SetTexture(Texture2D texture) { m_Texture = texture; }
         public void SetRotation(float rot) { m_Rotation = MathHelper.ToRadians(rot); }
 

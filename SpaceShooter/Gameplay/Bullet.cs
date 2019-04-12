@@ -7,8 +7,9 @@ namespace SpaceShooter.Gameplay
     public class Bullet : Entity
     {
         private float m_Speed;
-        public Bullet(Vector2 pos, float rotation, float scale, Texture2D texture, float speed, Rectangle rect) : 
-            base(pos, rotation, scale, texture, rect)
+
+        public Bullet(Vector2 pos, float rotation, float scale, Texture2D texture, float speed, Rectangle rect, GraphicsDeviceManager graphics) : 
+            base(pos, rotation, scale, texture, rect, graphics)
         {
             m_Position.X = pos.X;
             m_Position.Y = pos.Y;
@@ -16,9 +17,10 @@ namespace SpaceShooter.Gameplay
             m_Scale = scale;
             m_Rotation = rotation;
             m_Texture = texture;
-            m_Speed = speed;
 
+            m_Speed = speed;
             m_Rectangle = rect;
+            m_Graphics = graphics;
         }
 
         public override void Update(GameTime gameTime)

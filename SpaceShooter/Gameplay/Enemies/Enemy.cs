@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using System;
+
 namespace SpaceShooter.Gameplay.Enemies
 {
     public class Enemy : Entity
@@ -8,8 +10,8 @@ namespace SpaceShooter.Gameplay.Enemies
         private float m_Speed;
         private Vector2 m_PlayerPosition;
 
-        public Enemy(Vector2 pos, float rotation, float scale, Texture2D texture, float speed, Rectangle rect) :
-            base(pos, rotation, scale, texture, rect)
+        public Enemy(Vector2 pos, float rotation, float scale, Texture2D texture, float speed, Rectangle rect, GraphicsDeviceManager graphics) :
+            base(pos, rotation, scale, texture, rect, graphics)
         {
             m_Position.X = pos.X;
             m_Position.Y = pos.Y;
@@ -19,6 +21,7 @@ namespace SpaceShooter.Gameplay.Enemies
             m_Texture = texture;
 
             m_Speed = speed;
+            m_Graphics = graphics;
         }
 
         public void SetPlayerPosition(Vector2 pos) { m_PlayerPosition = pos; }
@@ -33,6 +36,8 @@ namespace SpaceShooter.Gameplay.Enemies
         {
             Vector2 dir = m_PlayerPosition - m_Position;
             dir.Normalize();
+
+            m_Rotation = (float)Math.Atan2(dir.Y, dir.X);
 
             SetPosition(GetPosition() + dir * speed * mul);
             base.Move(speed, mul);

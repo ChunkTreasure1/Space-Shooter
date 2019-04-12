@@ -16,6 +16,8 @@ namespace SpaceShooter.Gameplay
         protected float m_Scale;
         protected Color[] m_TextureData;
 
+        protected GraphicsDeviceManager m_Graphics;
+
         //Getting
         public Vector2 GetPosition() { return m_Position; }
         public float GetRotation() { return m_Rotation; }
@@ -25,14 +27,19 @@ namespace SpaceShooter.Gameplay
         public Color[] GetTextureData() { return m_TextureData; }
 
         //Setting
-        public void SetPosition(Vector2 pos) { m_Position = pos; m_Rectangle.X = (int)pos.X; m_Rectangle.Y = (int)pos.Y; }
+        public virtual void SetPosition(Vector2 pos)
+        {
+            m_Position = pos;
+            m_Rectangle.X = (int)pos.X;
+            m_Rectangle.Y = (int)pos.Y;
+        }
         public void SetTexture(Texture2D texture) { m_Texture = texture; }
         public void SetRotation(float rot) { m_Rotation = MathHelper.ToRadians(rot); }
 
         public void SetRectangle(Rectangle rect) { m_Rectangle = rect; }
 
         //Methods
-        public Entity(Vector2 pos, float rotation, float scale, Texture2D texture, Rectangle rect)
+        public Entity(Vector2 pos, float rotation, float scale, Texture2D texture, Rectangle rect, GraphicsDeviceManager graphics)
         {
             m_Position.X = pos.X;
             m_Position.Y = pos.Y;
@@ -40,7 +47,9 @@ namespace SpaceShooter.Gameplay
             m_Scale = scale;
             m_Rotation = rotation;
             m_Texture = texture;
+
             m_Rectangle = rect;
+            m_Graphics = graphics;
         }
         public virtual void Move(float speed, float mul) { }
         public virtual void Draw(ref SpriteBatch spriteBatch)
@@ -48,13 +57,12 @@ namespace SpaceShooter.Gameplay
             Rectangle rect = new Rectangle(0, 0, m_Texture.Width, m_Texture.Height);
             Vector2 origin = new Vector2(m_Texture.Width / 2, m_Texture.Height / 2);
 
-            spriteBatch.Draw(m_Texture, m_Position, rect, Color.White, m_Rotation, origin, m_Scale, SpriteEffects.None, 1);
+            spriteBatch.Draw(m_Texture, m_Position, rect, Color.White, m_Rotation + MathHelper.ToRadians(90), origin, m_Scale, SpriteEffects.None, 1);
         }
         public virtual void Update(GameTime gameTime)
         {
 
         }
-
         public void LoadTextureData()
         {
             m_TextureData = new Color[m_Texture.Width * m_Texture.Height];

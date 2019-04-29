@@ -13,6 +13,15 @@ namespace SpaceShooter
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
+
+    enum EGameState
+    {
+        eGS_Menu,
+        eGS_Playing,
+        eGS_Paused,
+        eGS_GameOver
+    }
+
     public class Game1 : Game
     {
         private GraphicsDeviceManager m_Graphics;
@@ -25,8 +34,14 @@ namespace SpaceShooter
 
         private bool m_Collision = false;
         private bool m_CreatedEnemy = false;
+        private bool m_EscPushed = false;
 
         private SpriteFont m_Font;
+        private EGameState m_GameState;
+        private Camera2D m_Camera;
+
+        private int m_Width;
+        private int m_Height;
 
         public Game1()
         {
@@ -47,9 +62,14 @@ namespace SpaceShooter
             //Create player
             m_Graphics.PreferredBackBufferWidth = GraphicsDevice.DisplayMode.Width;
             m_Graphics.PreferredBackBufferHeight = GraphicsDevice.DisplayMode.Height;
+
+            m_Width = GraphicsDevice.DisplayMode.Width;
+            m_Height = GraphicsDevice.DisplayMode.Height;
             //m_Graphics.IsFullScreen = true;
             m_Graphics.ApplyChanges();
 
+            m_Camera = new Camera2D();
+            m_GameState = EGameState.eGS_Playing;
             m_Player = new Player(new Vector2(100, 100), 0, 1f, null, new Rectangle(0, 0, 0, 0), m_Graphics, 10);
 
             base.Initialize();
@@ -96,9 +116,16 @@ namespace SpaceShooter
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            // TODO: Add your update logic here
-            UpdateEntities(gameTime);
             GetInput(gameTime);
+
+            if (m_GameState == EGameState.eGS_Paused || m_GameState == EGameState.eGS_GameOver || m_GameState == EGameState.eGS_Menu)
+            {
+                return;
+            }
+            else if(m_GameState == EGameState.eGS_Playing)
+            {
+                UpdateEntities(gameTime);
+            }
             base.Update(gameTime);
         }
 
@@ -108,6 +135,7 @@ namespace SpaceShooter
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
+
             if (m_Collision)
             {
                 GraphicsDevice.Clear(Color.Red);
@@ -117,7 +145,15 @@ namespace SpaceShooter
                 GraphicsDevice.Clear(Color.Black);
             }
 
-            m_SpriteBatch.Begin();
+            Vector3 screenScale = GetScreenScale();
+            Matrix viewMatrix = m_Camera.GetTransform();
+
+            m_SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, null, null, null, null, viewMatrix * Matrix.CreateScale(screenScale));
+
+            if (m_GameState == EGameState.eGS_Paused)
+            {
+                m_SpriteBatch.DrawString(m_Font, "PAUSED", new Vector2(GraphicsDevice.DisplayMode.Width / 2, GraphicsDevice.DisplayMode.Height / 2), Color.White);
+            }
 
             //Draw the player
             m_Player.Draw(ref m_SpriteBatch);
@@ -139,7 +175,25 @@ namespace SpaceShooter
         private void GetInput(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            {
+                if (!m_EscPushed)
+                {
+                    m_EscPushed = true;
+                    if (m_GameState == EGameState.eGS_Paused)
+                    {
+                        m_GameState = EGameState.eGS_Playing;
+                    }
+                    else
+                    {
+                        m_GameState = EGameState.eGS_Paused;
+                    }
+                }
+            }
+            if (Keyboard.GetState().IsKeyUp(Keys.Escape))
+            {
+                m_EscPushed = false;
+            }
+
             if (Keyboard.GetState().IsKeyDown(Keys.F))
             {
                 if (!m_CreatedEnemy)
@@ -156,6 +210,23 @@ namespace SpaceShooter
             if (Keyboard.GetState().IsKeyUp(Keys.F))
             {
                 m_CreatedEnemy = false;
+            }
+
+            if (Keyboard.GetState().IsKeyDown(Keys.W))
+            {
+                m_Camera.Move(new Vector2(0, 5));
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.S))
+            {
+                m_Camera.Move(new Vector2(0, -5));
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.D))
+            {
+                m_Camera.Move(new Vector2(-5, 0));
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.A))
+            {
+                m_Camera.Move(new Vector2(5, 0));
             }
         }
 
@@ -265,6 +336,13 @@ namespace SpaceShooter
             }
 
             return false;
+        }
+
+        public Vector3 GetScreenScale()
+        {
+            var scaleX = (float)GraphicsDevice.DisplayMode.Width / (float)m_Width;
+            var scaleY = (float)GraphicsDevice.DisplayMode.Height / (float)m_Height;
+            return new Vector3(scaleX, scaleY, 1.0f);
         }
     }
 }

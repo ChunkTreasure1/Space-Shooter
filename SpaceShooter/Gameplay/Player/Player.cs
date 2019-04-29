@@ -85,31 +85,30 @@ namespace SpaceShooter.Gameplay.Player
             GetInput();
             base.Update(gameTime);
         }
-
         private void GetInput()
         {
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
-            {
-                m_MaxSpeed = 100;
-                Move(0.1f, 1);
-            }
-            if (Keyboard.GetState().IsKeyUp(Keys.W))
-            {
-                m_MaxSpeed = 0;
-                Move(0.1f, 1);
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.S))
-            {
-                Move(-0.1f, 1);
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.D))
-            {
-                SetRotation(MathHelper.ToDegrees(GetRotation()) + 5f);
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.A))
-            {
-                SetRotation(MathHelper.ToDegrees(GetRotation()) - 5f);
-            }
+            //if (Keyboard.GetState().IsKeyDown(Keys.W))
+            //{
+            //    m_MaxSpeed = 10;
+            //    Move(0.1f, 1);
+            //}
+            //if (Keyboard.GetState().IsKeyUp(Keys.W))
+            //{
+            //    m_MaxSpeed = 0;
+            //    Move(0.1f, 1);
+            //}
+            //if (Keyboard.GetState().IsKeyDown(Keys.S))
+            //{
+            //    Move(-0.1f, 1);
+            //}
+            //if (Keyboard.GetState().IsKeyDown(Keys.D))
+            //{
+            //    SetRotation(MathHelper.ToDegrees(GetRotation()) + 5f);
+            //}
+            //if (Keyboard.GetState().IsKeyDown(Keys.A))
+            //{
+            //    SetRotation(MathHelper.ToDegrees(GetRotation()) - 5f);
+            //}
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && !m_ShootPressed)
             {
                 m_ShootPressed = true;
@@ -118,7 +117,7 @@ namespace SpaceShooter.Gameplay.Player
                                                      GetRotation(),
                                                      0.5f,
                                                      m_BulletTexture,
-                                                     GetMaxSpeed(),
+                                                     10f,
                                                      new Rectangle((int)GetPosition().X,
                                                                    (int)GetPosition().Y,
                                                                    m_BulletTexture.Width,

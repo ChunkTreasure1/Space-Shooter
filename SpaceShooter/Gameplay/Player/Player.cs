@@ -12,6 +12,7 @@ namespace SpaceShooter.Gameplay.Player
         private float m_MaxSpeed;
         private float m_CurrentSpeed;
         private bool m_ShootPressed = false;
+        private Camera2D m_Camera;
 
         private Texture2D m_BulletTexture;
 
@@ -19,7 +20,7 @@ namespace SpaceShooter.Gameplay.Player
 
         public List<Bullet> GetBullets() { return m_Bullets; }
 
-        public Player(Vector2 pos, float rotation, float scale, Texture2D texture, Rectangle rect, GraphicsDeviceManager graphics, float maxSpeed) :
+        public Player(Vector2 pos, float rotation, float scale, Texture2D texture, Rectangle rect, GraphicsDeviceManager graphics, float maxSpeed, Camera2D camera) :
             base(pos, rotation, scale, texture, rect, graphics)
         {
             m_Position.X = pos.X;
@@ -32,6 +33,8 @@ namespace SpaceShooter.Gameplay.Player
             m_Rectangle = rect;
             m_Graphics = graphics;
             m_MaxSpeed = maxSpeed;
+
+            m_Camera = camera;
         }
         public override void SetPosition(Vector2 pos)
         {
@@ -78,6 +81,15 @@ namespace SpaceShooter.Gameplay.Player
             }
 
             SetPosition(GetPosition() + dir * m_CurrentSpeed * mul);
+            Vector2 pos = GetPosition();
+
+            if (m_Camera.WorldToScreenCoords(ref pos).Y > (m_Graphics.PreferredBackBufferHeight / 1.33) || m_Camera.WorldToScreenCoords(ref pos).Y < (m_Graphics.PreferredBackBufferHeight / 2.33)
+                || m_Camera.WorldToScreenCoords(ref pos).X > (m_Graphics.PreferredBackBufferWidth / 1.33) || m_Camera.WorldToScreenCoords(ref pos).X < (m_Graphics.PreferredBackBufferWidth / 2.33)) 
+            {
+                pos = m_Camera.Position;
+
+                m_Camera.Move(dir * m_CurrentSpeed);
+            }
             base.Move(speed, mul);
         }
         public override void Update(GameTime gameTime)
@@ -87,28 +99,28 @@ namespace SpaceShooter.Gameplay.Player
         }
         private void GetInput()
         {
-            //if (Keyboard.GetState().IsKeyDown(Keys.W))
-            //{
-            //    m_MaxSpeed = 10;
-            //    Move(0.1f, 1);
-            //}
-            //if (Keyboard.GetState().IsKeyUp(Keys.W))
-            //{
-            //    m_MaxSpeed = 0;
-            //    Move(0.1f, 1);
-            //}
+            if (Keyboard.GetState().IsKeyDown(Keys.W))
+            {
+                m_MaxSpeed = 10;
+                Move(0.1f, 1);
+            }
+            if (Keyboard.GetState().IsKeyUp(Keys.W))
+            {
+                m_MaxSpeed = 0;
+                Move(0.1f, 1);
+            }
             //if (Keyboard.GetState().IsKeyDown(Keys.S))
             //{
             //    Move(-0.1f, 1);
             //}
-            //if (Keyboard.GetState().IsKeyDown(Keys.D))
-            //{
-            //    SetRotation(MathHelper.ToDegrees(GetRotation()) + 5f);
-            //}
-            //if (Keyboard.GetState().IsKeyDown(Keys.A))
-            //{
-            //    SetRotation(MathHelper.ToDegrees(GetRotation()) - 5f);
-            //}
+            if (Keyboard.GetState().IsKeyDown(Keys.D))
+            {
+                SetRotation(MathHelper.ToDegrees(GetRotation()) + 5f);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.A))
+            {
+                SetRotation(MathHelper.ToDegrees(GetRotation()) - 5f);
+            }
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && !m_ShootPressed)
             {
                 m_ShootPressed = true;

@@ -68,9 +68,9 @@ namespace SpaceShooter
             //m_Graphics.IsFullScreen = true;
             m_Graphics.ApplyChanges();
 
-            m_Camera = new Camera2D();
+            m_Camera = new Camera2D(m_Width, m_Height);
             m_GameState = EGameState.eGS_Playing;
-            m_Player = new Player(new Vector2(100, 100), 0, 1f, null, new Rectangle(0, 0, 0, 0), m_Graphics, 10);
+            m_Player = new Player(new Vector2(100, 100), 0, 1f, null, new Rectangle(0, 0, 0, 0), m_Graphics, 10, m_Camera);
 
             base.Initialize();
         }
@@ -212,22 +212,22 @@ namespace SpaceShooter
                 m_CreatedEnemy = false;
             }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
-            {
-                m_Camera.Move(new Vector2(0, 5));
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.S))
-            {
-                m_Camera.Move(new Vector2(0, -5));
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.D))
-            {
-                m_Camera.Move(new Vector2(-5, 0));
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.A))
-            {
-                m_Camera.Move(new Vector2(5, 0));
-            }
+            //if (Keyboard.GetState().IsKeyDown(Keys.W))
+            //{
+            //    m_Camera.Move(new Vector2(0, 5));
+            //}
+            //if (Keyboard.GetState().IsKeyDown(Keys.S))
+            //{
+            //    m_Camera.Move(new Vector2(0, -5));
+            //}
+            //if (Keyboard.GetState().IsKeyDown(Keys.D))
+            //{
+            //    m_Camera.Move(new Vector2(-5, 0));
+            //}
+            //if (Keyboard.GetState().IsKeyDown(Keys.A))
+            //{
+            //    m_Camera.Move(new Vector2(5, 0));
+            //}
         }
 
         //Updates all the entities

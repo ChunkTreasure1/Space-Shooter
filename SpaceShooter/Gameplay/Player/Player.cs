@@ -86,9 +86,7 @@ namespace SpaceShooter.Gameplay.Player
             if (m_Camera.WorldToScreenCoords(ref pos).Y > (m_Graphics.PreferredBackBufferHeight / 1.33) || m_Camera.WorldToScreenCoords(ref pos).Y < (m_Graphics.PreferredBackBufferHeight / 2.33)
                 || m_Camera.WorldToScreenCoords(ref pos).X > (m_Graphics.PreferredBackBufferWidth / 1.33) || m_Camera.WorldToScreenCoords(ref pos).X < (m_Graphics.PreferredBackBufferWidth / 2.33)) 
             {
-                pos = m_Camera.Position;
-
-                m_Camera.Move(dir * m_CurrentSpeed);
+                //m_Camera.Move(dir * m_CurrentSpeed);
             }
             base.Move(speed, mul);
         }
@@ -102,12 +100,12 @@ namespace SpaceShooter.Gameplay.Player
             if (Keyboard.GetState().IsKeyDown(Keys.W))
             {
                 m_MaxSpeed = 10;
-                Move(0.1f, 1);
+                Move(0.01f, 1);
             }
             if (Keyboard.GetState().IsKeyUp(Keys.W))
             {
                 m_MaxSpeed = 0;
-                Move(0.1f, 1);
+                Move(0.01f, 1);
             }
             //if (Keyboard.GetState().IsKeyDown(Keys.S))
             //{
@@ -115,11 +113,11 @@ namespace SpaceShooter.Gameplay.Player
             //}
             if (Keyboard.GetState().IsKeyDown(Keys.D))
             {
-                SetRotation(MathHelper.ToDegrees(GetRotation()) + 5f);
+                SetRotation(MathHelper.ToDegrees(GetRotation()) + 3f);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.A))
             {
-                SetRotation(MathHelper.ToDegrees(GetRotation()) - 5f);
+                SetRotation(MathHelper.ToDegrees(GetRotation()) - 3f);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && !m_ShootPressed)
             {

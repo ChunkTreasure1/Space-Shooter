@@ -38,7 +38,7 @@ namespace SpaceShooter.Gameplay.Enemies
             dir.Normalize();
 
             m_Rotation = (float)Math.Atan2(dir.Y, dir.X);
-
+            
             SetPosition(GetPosition() + dir * speed * mul);
             base.Move(speed, mul);
         }

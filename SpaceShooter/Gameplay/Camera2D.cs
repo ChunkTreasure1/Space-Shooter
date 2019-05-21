@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 
 public class Camera2D
 {
@@ -28,6 +29,7 @@ public class Camera2D
     {
         Position += direction;
         m_Mat = GetTransform();
+        Console.WriteLine(Position.X.ToString() + ", " + Position.Y.ToString());
     }
 
     public Matrix GetTransform()

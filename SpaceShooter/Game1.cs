@@ -39,6 +39,7 @@ namespace SpaceShooter
         private SpriteFont m_Font;
         private EGameState m_GameState;
         private Camera2D m_Camera;
+        private EnemySpawner m_EnemySpawner;
 
         private int m_Width;
         private int m_Height;
@@ -71,6 +72,7 @@ namespace SpaceShooter
             m_Camera = new Camera2D(m_Width, m_Height);
             m_GameState = EGameState.eGS_Playing;
             m_Player = new Player(new Vector2(100, 100), 0, 1f, null, new Rectangle(0, 0, 0, 0), m_Graphics, 10, m_Camera);
+            m_EnemySpawner = new EnemySpawner(ref m_Enemies, 2000, m_EnemyTexture, m_Graphics);
 
             base.Initialize();
         }
@@ -87,7 +89,7 @@ namespace SpaceShooter
             //Add textures
             m_Player.SetTexture(Content.Load<Texture2D>("Images/PlayerShip"));
             m_Player.SetBulletTexture(Content.Load<Texture2D>("Images/bullet"));
-            m_EnemyTexture = Content.Load<Texture2D>("Images/EnemyShip");
+            m_EnemySpawner.SetTexture(Content.Load<Texture2D>("Images/EnemyShip"));
 
             //Fonts
             m_Font = Content.Load<SpriteFont>("Fonts/Roboto");
@@ -289,7 +291,7 @@ namespace SpaceShooter
                     {
                         i = 0;
                     }
-                    if (IntersectsPixel(m_Player.GetBullets()[i].GetRectangle(), m_Player.GetBullets()[i].GetTextureData(), m_Enemies[j].GetRectangle(), m_Enemies[j].GetTextureData()))
+                     if (IntersectsPixel(m_Player.GetBullets()[i].GetRectangle(), m_Player.GetBullets()[i].GetTextureData(), m_Enemies[j].GetRectangle(), m_Enemies[j].GetTextureData()))
                     {
                         m_Enemies.RemoveAt(j);
                         m_Player.GetBullets().RemoveAt(i);

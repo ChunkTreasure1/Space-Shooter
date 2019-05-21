@@ -7,7 +7,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{9ABCCF30-44A2-4D61-AA18-4093E025F4E2}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SpaceShooter</RootNamespace>
     <AssemblyName>SpaceShooter</AssemblyName>
@@ -40,11 +40,15 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="Game1.cs" />
     <Compile Include="Gameplay\Bullet.cs" />
     <Compile Include="Gameplay\Camera2D.cs" />
     <Compile Include="Gameplay\Enemies\Enemy.cs" />
+    <Compile Include="Gameplay\Enemies\EnemySpawner.cs" />
     <Compile Include="Gameplay\Entity.cs" />
     <Compile Include="Gameplay\Player\Player.cs" />
     <Compile Include="Program.cs" />

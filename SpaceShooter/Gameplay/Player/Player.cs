@@ -15,7 +15,6 @@ namespace SpaceShooter.Gameplay.Player
         private Camera2D m_Camera;
 
         private Texture2D m_BulletTexture;
-
         private List<Bullet> m_Bullets = new List<Bullet>();
 
         public List<Bullet> GetBullets() { return m_Bullets; }
@@ -100,12 +99,12 @@ namespace SpaceShooter.Gameplay.Player
             if (Keyboard.GetState().IsKeyDown(Keys.W))
             {
                 m_MaxSpeed = 10;
-                Move(0.01f, 1);
+                Move(0.1f, 1);
             }
             if (Keyboard.GetState().IsKeyUp(Keys.W))
             {
                 m_MaxSpeed = 0;
-                Move(0.01f, 1);
+                Move(0.1f, 1);
             }
             //if (Keyboard.GetState().IsKeyDown(Keys.S))
             //{
@@ -122,17 +121,10 @@ namespace SpaceShooter.Gameplay.Player
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && !m_ShootPressed)
             {
                 m_ShootPressed = true;
-                GetBullets().Add(new Bullet(new Vector2(GetPosition().X,
-                                                                 GetPosition().Y),
-                                                     GetRotation(),
-                                                     0.5f,
-                                                     m_BulletTexture,
-                                                     10f,
-                                                     new Rectangle((int)GetPosition().X,
-                                                                   (int)GetPosition().Y,
-                                                                   m_BulletTexture.Width,
-                                                                   m_BulletTexture.Height),
-                                                     m_Graphics));
+                GetBullets().Add(new Bullet(new Vector2(GetPosition().X, GetPosition().Y),
+                    GetRotation(), 0.5f, m_BulletTexture, 10f,
+                    new Rectangle((int)GetPosition().X, (int)GetPosition().Y, m_BulletTexture.Width, m_BulletTexture.Height),
+                    m_Graphics));
 
                 GetBullets()[GetBullets().Count - 1].LoadTextureData();
             }

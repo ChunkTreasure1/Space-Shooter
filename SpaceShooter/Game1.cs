@@ -72,7 +72,7 @@ namespace SpaceShooter
             m_Camera = new Camera2D(m_Width, m_Height);
             m_GameState = EGameState.eGS_Playing;
             m_Player = new Player(new Vector2(100, 100), 0, 1f, null, new Rectangle(0, 0, 0, 0), m_Graphics, 10, m_Camera);
-            m_EnemySpawner = new EnemySpawner(ref m_Enemies, 2000, m_EnemyTexture, m_Graphics);
+            m_EnemySpawner = new EnemySpawner(ref m_Enemies, 2000, m_Graphics);
 
             base.Initialize();
         }
@@ -86,10 +86,13 @@ namespace SpaceShooter
             // Create a new SpriteBatch, which can be used to draw textures.
             m_SpriteBatch = new SpriteBatch(GraphicsDevice);
 
+            Texture2D bullet = Content.Load<Texture2D>("Images/bullet");
+
             //Add textures
             m_Player.SetTexture(Content.Load<Texture2D>("Images/PlayerShip"));
-            m_Player.SetBulletTexture(Content.Load<Texture2D>("Images/bullet"));
+            m_Player.SetBulletTexture(bullet);
             m_EnemySpawner.SetTexture(Content.Load<Texture2D>("Images/EnemyShip"));
+            m_EnemySpawner.SetBulletTexture(bullet);
 
             //Fonts
             m_Font = Content.Load<SpriteFont>("Fonts/Roboto");
@@ -244,6 +247,23 @@ namespace SpaceShooter
                 {
                     m_Enemies[i].Update(gameTime);
                     m_Enemies[i].SetPlayerPosition(m_Player.GetPosition());
+
+                    if (m_Enemies[i].GetBullets().Count > 0)
+                    {
+                        for (int j = 0; j < m_Enemies[i].GetBullets().Count; j++)
+                        {
+                            if (m_Enemies[i].GetBullets()[j].GetPosition().X > m_Graphics.PreferredBackBufferWidth || m_Enemies[i].GetBullets()[j].GetPosition().X < 0 ||
+                                m_Enemies[i].GetBullets()[j].GetPosition().Y > m_Graphics.PreferredBackBufferHeight || m_Enemies[i].GetBullets()[j].GetPosition().Y < 0)
+                            {
+                                m_Enemies[i].GetBullets().RemoveAt(j);
+                                j--;
+                            }
+                            else
+                            {
+                                m_Enemies[i].GetBullets()[j].Update(gameTime);
+                            }
+                        }
+                    }
                 }
             }
 

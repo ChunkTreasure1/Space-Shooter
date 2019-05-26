@@ -7,6 +7,13 @@ namespace SpaceShooter.Gameplay
     public class Bullet : Entity
     {
         private float m_Speed;
+        private float m_Damage = 50f;
+
+        //Setting
+        public void SetDamage(float damage) { m_Damage = damage; }
+
+        //Getting
+        public float GetDamage() { return m_Damage; }
 
         public Bullet(Vector2 pos, float rotation, float scale, Texture2D texture, float speed, Rectangle rect, GraphicsDeviceManager graphics) : 
             base(pos, rotation, scale, texture, rect, graphics)

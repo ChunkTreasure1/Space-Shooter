@@ -18,12 +18,13 @@ namespace SpaceShooter.Gameplay.Enemies
 
         Texture2D m_EnemyTexture;
         Texture2D m_BulletTexture;
+        Texture2D m_EmptyTexture;
         GraphicsDeviceManager m_Graphics;
 
         public EnemySpawner(ref List<Enemy> enemies, int time, GraphicsDeviceManager graphics)
         {
             m_EnemyList = enemies;
-            m_Level = 0;
+            m_Level = 1;
             m_Time = time;
 
             m_Graphics = graphics;
@@ -32,6 +33,7 @@ namespace SpaceShooter.Gameplay.Enemies
         }
         public void SetTexture(Texture2D texture) { m_EnemyTexture = texture; }
         public void SetBulletTexture(Texture2D texture) { m_BulletTexture = texture; }
+        public void SetEmptyTexture(Texture2D texture) { m_EmptyTexture = texture; }
         private void SetTimer(int time)
         {
             m_Timer = new Timer(time);
@@ -43,10 +45,13 @@ namespace SpaceShooter.Gameplay.Enemies
         {
             Vector2 pos = GetRandomPosition();
 
-            //Spawn
-            m_EnemyList.Add(new Enemy(pos, 0, 1, m_EnemyTexture, 4, new Rectangle((int)pos.X, (int)pos.Y - 50, m_EnemyTexture.Width, m_EnemyTexture.Height), m_Graphics));
-            m_EnemyList[m_EnemyList.Count - 1].LoadTextureData();
-            m_EnemyList[m_EnemyList.Count - 1].SetBulletTexture(m_BulletTexture);
+            if (m_EnemyList.Count < m_Level * 5)
+            {
+                //Spawn
+                m_EnemyList.Add(new Enemy(pos, 0, 1, m_EnemyTexture, 4, new Rectangle((int)pos.X, (int)pos.Y - 50, m_EnemyTexture.Width, m_EnemyTexture.Height), m_Graphics, m_EmptyTexture));
+                m_EnemyList[m_EnemyList.Count - 1].LoadTextureData();
+                m_EnemyList[m_EnemyList.Count - 1].SetBulletTexture(m_BulletTexture);
+            }
             m_Timer.Enabled = false;
             m_Timer.Dispose();
 

@@ -11,13 +11,38 @@ namespace SpaceShooter.Gameplay.Player
     {
         private float m_MaxSpeed;
         private float m_CurrentSpeed;
-        private bool m_ShootPressed = false;
-        private Camera2D m_Camera;
 
+        private bool m_ShootPressed = false;
+        private bool m_FrontGunsActive = true;
+        private bool m_GunChangePressed = false;
+
+        private Camera2D m_Camera;
         private Texture2D m_BulletTexture;
         private List<Bullet> m_Bullets = new List<Bullet>();
 
+        private float m_Health = 100f;
+        private float m_MaxHealth = 100f;
+        private Texture2D m_EmptyTexture;
+
+        //Getting
         public List<Bullet> GetBullets() { return m_Bullets; }
+        public float GetMaxSpeed() { return m_MaxSpeed; }
+        public float GetHealth() { return m_Health; }
+
+        //Setting
+        public override void SetPosition(Vector2 pos)
+        {
+            if (pos.X < m_Graphics.PreferredBackBufferWidth && pos.X > 0 &&
+                pos.Y < m_Graphics.PreferredBackBufferHeight && pos.Y > 0)
+            {
+                m_Position = pos;
+                m_Rectangle.X = (int)pos.X;
+                m_Rectangle.Y = (int)pos.Y;
+            }
+        }
+        public void SetBulletTexture(Texture2D texture) { m_BulletTexture = texture; }
+        public void SetHealth(float health) { m_Health = health; }
+        public void SetEmptyTexture(Texture2D texture) { m_EmptyTexture = texture; }
 
         public Player(Vector2 pos, float rotation, float scale, Texture2D texture, Rectangle rect, GraphicsDeviceManager graphics, float maxSpeed, Camera2D camera) :
             base(pos, rotation, scale, texture, rect, graphics)
@@ -35,18 +60,7 @@ namespace SpaceShooter.Gameplay.Player
 
             m_Camera = camera;
         }
-        public override void SetPosition(Vector2 pos)
-        {
-            if (pos.X < m_Graphics.PreferredBackBufferWidth && pos.X > 0 &&
-                pos.Y < m_Graphics.PreferredBackBufferHeight && pos.Y > 0)
-            {
-                m_Position = pos;
-                m_Rectangle.X = (int)pos.X;
-                m_Rectangle.Y = (int)pos.Y;
-            }
-        }
-        public void SetBulletTexture(Texture2D texture) { m_BulletTexture = texture; }
-        public float GetMaxSpeed() { return m_MaxSpeed; }
+
 
         //Overrides the drawing of the player
         public override void Draw(ref SpriteBatch spriteBatch)
@@ -55,6 +69,15 @@ namespace SpaceShooter.Gameplay.Player
             Vector2 origin = new Vector2(m_Texture.Width / 2, m_Texture.Height / 2);
 
             spriteBatch.Draw(m_Texture, m_Position, rect, Color.White, m_Rotation + MathHelper.ToRadians(90), origin, m_Scale, SpriteEffects.None, 1);
+
+            if (m_Health >= m_MaxHealth && m_Health > 50)
+            {
+                spriteBatch.Draw(m_EmptyTexture, new Rectangle((int)m_Position.X - 50, (int)m_Position.Y + m_Texture.Height, (int)(m_Texture.Width * (m_Health / m_MaxHealth)), m_EmptyTexture.Height + 10), Color.Green);
+            }
+            if (m_Health <= m_MaxHealth / 2)
+            {
+                spriteBatch.Draw(m_EmptyTexture, new Rectangle((int)m_Position.X - 50, (int)m_Position.Y + m_Texture.Height, (int)(m_Texture.Width * (m_Health / m_MaxHealth)), m_EmptyTexture.Height + 10), Color.Yellow);
+            }
 
             if (m_Bullets.Count > 0)
             {
@@ -106,10 +129,6 @@ namespace SpaceShooter.Gameplay.Player
                 m_MaxSpeed = 0;
                 Move(0.1f, 1);
             }
-            //if (Keyboard.GetState().IsKeyDown(Keys.S))
-            //{
-            //    Move(-0.1f, 1);
-            //}
             if (Keyboard.GetState().IsKeyDown(Keys.D))
             {
                 SetRotation(MathHelper.ToDegrees(GetRotation()) + 3f);
@@ -120,9 +139,19 @@ namespace SpaceShooter.Gameplay.Player
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && !m_ShootPressed)
             {
+                float rotation = 0f;
+
+                if (m_FrontGunsActive)
+                {
+                    rotation = GetRotation();
+                }
+                else
+                {
+                    rotation = GetRotation() - MathHelper.ToRadians(180);
+                }
                 m_ShootPressed = true;
                 GetBullets().Add(new Bullet(new Vector2(GetPosition().X, GetPosition().Y),
-                    GetRotation(), 0.5f, m_BulletTexture, 10f,
+                    rotation, 0.5f, m_BulletTexture, 10f,
                     new Rectangle((int)GetPosition().X, (int)GetPosition().Y, m_BulletTexture.Width, m_BulletTexture.Height),
                     m_Graphics));
 
@@ -131,6 +160,14 @@ namespace SpaceShooter.Gameplay.Player
             if (Keyboard.GetState().IsKeyUp(Keys.Space) && m_ShootPressed)
             {
                 m_ShootPressed = false;
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.F) && !m_GunChangePressed)
+            {
+                m_FrontGunsActive = !m_FrontGunsActive;
+            }
+            if (Keyboard.GetState().IsKeyUp(Keys.F))
+            {
+                m_GunChangePressed = false;
             }
         }
     }

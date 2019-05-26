@@ -29,8 +29,7 @@ namespace SpaceShooter
         private Player m_Player;
 
         private List<Enemy> m_Enemies = new List<Enemy>();
-        private Texture2D m_BulletTexture;
-        private Texture2D m_EnemyTexture;
+        private Texture2D m_EmptyTexture;
 
         private bool m_Collision = false;
         private bool m_CreatedEnemy = false;
@@ -89,9 +88,12 @@ namespace SpaceShooter
             Texture2D bullet = Content.Load<Texture2D>("Images/bullet");
 
             //Add textures
+            m_EmptyTexture = Content.Load<Texture2D>("Images/EmptyTexture");
             m_Player.SetTexture(Content.Load<Texture2D>("Images/PlayerShip"));
+            m_Player.SetEmptyTexture(m_EmptyTexture);
             m_Player.SetBulletTexture(bullet);
             m_EnemySpawner.SetTexture(Content.Load<Texture2D>("Images/EnemyShip"));
+            m_EnemySpawner.SetEmptyTexture(m_EmptyTexture);
             m_EnemySpawner.SetBulletTexture(bullet);
 
             //Fonts
@@ -198,41 +200,6 @@ namespace SpaceShooter
             {
                 m_EscPushed = false;
             }
-
-            if (Keyboard.GetState().IsKeyDown(Keys.F))
-            {
-                if (!m_CreatedEnemy)
-                {
-                    m_CreatedEnemy = true;
-                    m_Enemies.Add(new Enemy(new Vector2(100, 100),
-                                  0, 1f, m_EnemyTexture, 4,
-                                  new Rectangle(100, 100, m_EnemyTexture.Width, m_EnemyTexture.Height),
-                                  m_Graphics));
-
-                    m_Enemies[m_Enemies.Count - 1].LoadTextureData();
-                }
-            }
-            if (Keyboard.GetState().IsKeyUp(Keys.F))
-            {
-                m_CreatedEnemy = false;
-            }
-
-            //if (Keyboard.GetState().IsKeyDown(Keys.W))
-            //{
-            //    m_Camera.Move(new Vector2(0, 5));
-            //}
-            //if (Keyboard.GetState().IsKeyDown(Keys.S))
-            //{
-            //    m_Camera.Move(new Vector2(0, -5));
-            //}
-            //if (Keyboard.GetState().IsKeyDown(Keys.D))
-            //{
-            //    m_Camera.Move(new Vector2(-5, 0));
-            //}
-            //if (Keyboard.GetState().IsKeyDown(Keys.A))
-            //{
-            //    m_Camera.Move(new Vector2(5, 0));
-            //}
         }
 
         //Updates all the entities
@@ -285,19 +252,6 @@ namespace SpaceShooter
                 }
             }
 
-            //Check for enemy collision
-            for (int i = 0; i < m_Enemies.Count; i++)
-            {
-                if (IntersectsPixel(m_Player.GetRectangle(), m_Player.GetTextureData(), m_Enemies[i].GetRectangle(), m_Enemies[i].GetTextureData()))
-                {
-                    m_Collision = true;
-                }
-                else
-                {
-                    m_Collision = false;
-                }
-            }
-
             //Check for bullet collision
             for (int i = 0; i < m_Player.GetBullets().Count; i++)
             {
@@ -311,9 +265,13 @@ namespace SpaceShooter
                     {
                         i = 0;
                     }
-                     if (IntersectsPixel(m_Player.GetBullets()[i].GetRectangle(), m_Player.GetBullets()[i].GetTextureData(), m_Enemies[j].GetRectangle(), m_Enemies[j].GetTextureData()))
+                    if (IntersectsPixel(m_Player.GetBullets()[i].GetRectangle(), m_Player.GetBullets()[i].GetTextureData(), m_Enemies[j].GetRectangle(), m_Enemies[j].GetTextureData()))
                     {
-                        m_Enemies.RemoveAt(j);
+                        m_Enemies[j].SetHealth(m_Enemies[j].GetHealth() - m_Player.GetBullets()[i].GetDamage());
+                        if (m_Enemies[j].GetHealth() <= 0)
+                        {
+                            m_Enemies.RemoveAt(j);
+                        }
                         m_Player.GetBullets().RemoveAt(i);
                         if (m_Enemies.Count < 1 || m_Player.GetBullets().Count < 1)
                         {

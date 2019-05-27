@@ -7,7 +7,7 @@ namespace SpaceShooter.Gameplay
     public class Bullet : Entity
     {
         private float m_Speed;
-        private float m_Damage = 50f;
+        private float m_Damage = 30f;
 
         //Setting
         public void SetDamage(float damage) { m_Damage = damage; }

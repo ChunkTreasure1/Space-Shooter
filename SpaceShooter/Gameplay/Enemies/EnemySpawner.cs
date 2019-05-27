@@ -13,6 +13,7 @@ namespace SpaceShooter.Gameplay.Enemies
         //Private vars
         int m_Level;
         int m_Time;
+        int m_KillCount = 0;
         List<Enemy> m_EnemyList;
         Timer m_Timer;
 
@@ -20,6 +21,21 @@ namespace SpaceShooter.Gameplay.Enemies
         Texture2D m_BulletTexture;
         Texture2D m_EmptyTexture;
         GraphicsDeviceManager m_Graphics;
+
+        //Getting
+        public int GetLevel() { return m_Level; }
+
+        //Setting
+        public void SetTexture(Texture2D texture) { m_EnemyTexture = texture; }
+        public void SetBulletTexture(Texture2D texture) { m_BulletTexture = texture; }
+        public void SetEmptyTexture(Texture2D texture) { m_EmptyTexture = texture; }
+        private void SetTimer(int time)
+        {
+            m_Timer = new Timer(time);
+            m_Timer.Elapsed += OnTimerEnd;
+            m_Timer.AutoReset = false;
+            m_Timer.Enabled = true;
+        }
 
         public EnemySpawner(ref List<Enemy> enemies, int time, GraphicsDeviceManager graphics)
         {
@@ -31,21 +47,17 @@ namespace SpaceShooter.Gameplay.Enemies
 
             SetTimer(time);
         }
-        public void SetTexture(Texture2D texture) { m_EnemyTexture = texture; }
-        public void SetBulletTexture(Texture2D texture) { m_BulletTexture = texture; }
-        public void SetEmptyTexture(Texture2D texture) { m_EmptyTexture = texture; }
-        private void SetTimer(int time)
-        {
-            m_Timer = new Timer(time);
-            m_Timer.Elapsed += OnTimerEnd;
-            m_Timer.AutoReset = false;
-            m_Timer.Enabled = true;
-        }
         private void OnTimerEnd(Object source, ElapsedEventArgs e)
         {
             Vector2 pos = GetRandomPosition();
 
-            if (m_EnemyList.Count < m_Level * 5)
+            if (m_KillCount >= m_Level * 10)
+            {
+                m_Level++;
+                m_KillCount = 0;
+            }
+
+            if (m_EnemyList.Count < 7)
             {
                 //Spawn
                 m_EnemyList.Add(new Enemy(pos, 0, 1, m_EnemyTexture, 4, new Rectangle((int)pos.X, (int)pos.Y - 50, m_EnemyTexture.Width, m_EnemyTexture.Height), m_Graphics, m_EmptyTexture));

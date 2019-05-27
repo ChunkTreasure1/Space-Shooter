@@ -21,13 +21,17 @@ namespace SpaceShooter.Gameplay.Enemies
         private float m_Health = 100f;
         private float m_MaxHealth = 100f;
 
+        private int m_KillScore = 10;
+
         //Getting
         public List<Bullet> GetBullets() { return m_Bullets; }
         public float GetHealth() { return m_Health; }
+        public int GetKillScore() { return m_KillScore; }
 
         //Setting
         public void SetBulletTexture(Texture2D texture) { m_BulletTexture = texture; }
         public void SetHealth(float health) { m_Health = health; }
+        public void SetKillScore(int i) { m_KillScore = i; }
 
         public Enemy(Vector2 pos, float rotation, float scale, Texture2D texture, float speed, Rectangle rect, GraphicsDeviceManager graphics, Texture2D emptyTexture) :
             base(pos, rotation, scale, texture, rect, graphics)
@@ -48,7 +52,7 @@ namespace SpaceShooter.Gameplay.Enemies
 
         public override void Update(GameTime gameTime)
         {
-            if (Vector2.Distance(m_PlayerPosition, m_Position) < 300 && !m_ShootTimerStarted)
+            if (Vector2.Distance(m_PlayerPosition, m_Position) < 1000 && !m_ShootTimerStarted)
             {
                 SetTimer(2000);
                 m_ShootTimerStarted = true;
@@ -79,13 +83,19 @@ namespace SpaceShooter.Gameplay.Enemies
 
             spriteBatch.Draw(m_Texture, m_Position, rect, Color.White, m_Rotation + MathHelper.ToRadians(90), origin, m_Scale, SpriteEffects.None, 1);
 
-            if (m_Health >= m_MaxHealth && m_Health > 50)
+            if (m_Health > m_MaxHealth / 2)
             {
                 spriteBatch.Draw(m_EmptyTexture, new Rectangle((int)m_Position.X - 50, (int)m_Position.Y + m_Texture.Height, (int)(m_Texture.Width * (m_Health / m_MaxHealth)), m_EmptyTexture.Height + 10), Color.Green);
             }
+
             if (m_Health <= m_MaxHealth / 2)
             {
                 spriteBatch.Draw(m_EmptyTexture, new Rectangle((int)m_Position.X - 50, (int)m_Position.Y + m_Texture.Height, (int)(m_Texture.Width * (m_Health / m_MaxHealth)), m_EmptyTexture.Height + 10), Color.Yellow);
+            }
+
+            if (m_Health <= m_MaxHealth / 5)
+            {
+                spriteBatch.Draw(m_EmptyTexture, new Rectangle((int)m_Position.X - 50, (int)m_Position.Y + m_Texture.Height, (int)(m_Texture.Width * (m_Health / m_MaxHealth)), m_EmptyTexture.Height + 10), Color.Red);
             }
 
             if (m_Bullets.Count > 0)

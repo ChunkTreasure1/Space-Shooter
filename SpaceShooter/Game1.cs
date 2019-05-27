@@ -142,7 +142,6 @@ namespace SpaceShooter
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-
             if (m_Collision)
             {
                 GraphicsDevice.Clear(Color.Red);
@@ -161,6 +160,10 @@ namespace SpaceShooter
             {
                 m_SpriteBatch.DrawString(m_Font, "PAUSED", new Vector2(GraphicsDevice.DisplayMode.Width / 2, GraphicsDevice.DisplayMode.Height / 2), Color.White);
             }
+            else if(m_GameState == EGameState.eGS_GameOver)
+            {
+                m_SpriteBatch.DrawString(m_Font, "GAME OVER", new Vector2(GraphicsDevice.DisplayMode.Width / 2, GraphicsDevice.DisplayMode.Height / 2), Color.White);
+            }
 
             //Draw the player
             m_Player.Draw(ref m_SpriteBatch);
@@ -173,6 +176,8 @@ namespace SpaceShooter
             }
 
             m_SpriteBatch.DrawString(m_Font, "FPS: " + 1 / (float)gameTime.ElapsedGameTime.TotalSeconds, new Vector2(100, 100), Color.White);
+            m_SpriteBatch.DrawString(m_Font, "Score: " + m_Player.GetScore(), new Vector2(GraphicsDevice.DisplayMode.Width - 200, 100), Color.White);
+            m_SpriteBatch.DrawString(m_Font, "Level: " + m_EnemySpawner.GetLevel(), new Vector2(GraphicsDevice.DisplayMode.Width - 200, 150), Color.White);
 
             m_SpriteBatch.End();
             base.Draw(gameTime);
@@ -270,6 +275,8 @@ namespace SpaceShooter
                         m_Enemies[j].SetHealth(m_Enemies[j].GetHealth() - m_Player.GetBullets()[i].GetDamage());
                         if (m_Enemies[j].GetHealth() <= 0)
                         {
+                            m_Player.SetKillCount(m_Player.GetKills() + 1);
+                            m_Player.SetScore(m_Player.GetScore() + m_Enemies[j].GetKillScore());
                             m_Enemies.RemoveAt(j);
                         }
                         m_Player.GetBullets().RemoveAt(i);
@@ -290,8 +297,38 @@ namespace SpaceShooter
                     }
                 }
             }
-        }
 
+            //Check for enemy bullet collision
+            for (int i = 0; i < m_Enemies.Count; i++)
+            {
+                for (int j = 0; j < m_Enemies[i].GetBullets().Count; j++)
+                {
+                    if (m_Enemies[i].GetBullets().Count == 0)
+                    {
+                        break;
+                    }
+
+                    if (IntersectsPixel(m_Enemies[i].GetBullets()[j].GetRectangle(), m_Enemies[i].GetBullets()[j].GetTextureData(), m_Player.GetRectangle(), m_Player.GetTextureData()))
+                    {
+                        m_Player.SetHealth(m_Player.GetHealth() - m_Enemies[i].GetBullets()[j].GetDamage());
+                        if (m_Player.GetHealth() <= 0)
+                        {
+                            m_GameState = EGameState.eGS_GameOver;
+                        }
+
+                        m_Enemies[i].GetBullets().RemoveAt(j);
+                        if (m_Enemies[i].GetBullets().Count < 1)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            j--;
+                        }
+                    }
+                }
+            }
+        }
         static bool IntersectsPixel(Rectangle rect1, Color[] data1,
                                     Rectangle rect2, Color[] data2)
         {

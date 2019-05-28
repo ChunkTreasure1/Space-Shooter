@@ -34,12 +34,11 @@ public class Camera2D
 
     public Matrix GetTransform()
     {
-        var translationMatrix = Matrix.CreateTranslation(new Vector3(Position.X, Position.Y, 0));
-        var rotationMatrix = Matrix.CreateRotationZ(Rotation);
-        var scaleMatrix = Matrix.CreateScale(new Vector3(Zoom, Zoom, 1));
-        var originMatrix = Matrix.CreateTranslation(new Vector3(Origin.X, Origin.Y, 0));
-
-        return translationMatrix * rotationMatrix * scaleMatrix * originMatrix;
+        Matrix transform = Matrix.CreateTranslation(new Vector3(-Position.X, -Position.Y, 0)) *
+            Matrix.CreateRotationZ(Rotation) *
+            Matrix.CreateScale(new Vector3(Zoom, Zoom, 1)) *
+            Matrix.CreateTranslation(new Vector3(m_Width * 0.5f, m_Height * 0.5f, 0));
+        return transform;
     }
 
     public Vector2 ScreenToWorldCoords(Vector2 screenCords)

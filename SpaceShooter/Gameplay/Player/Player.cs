@@ -31,19 +31,20 @@ namespace SpaceShooter.Gameplay.Player
         public List<Bullet> GetBullets() { return m_Bullets; }
         public float GetMaxSpeed() { return m_MaxSpeed; }
         public float GetHealth() { return m_Health; }
+        public float GetMaxHealth() { return m_MaxHealth; }
         public int GetKills() { return m_KillCount; }
         public int GetScore() { return m_Score; }
 
         //Setting
         public override void SetPosition(Vector2 pos)
         {
-            if (pos.X < m_Graphics.PreferredBackBufferWidth && pos.X > 0 &&
-                pos.Y < m_Graphics.PreferredBackBufferHeight && pos.Y > 0)
-            {
+            //if (pos.X < m_Graphics.PreferredBackBufferWidth && pos.X > 0 &&
+            //    pos.Y < m_Graphics.PreferredBackBufferHeight && pos.Y > 0)
+            //{
                 m_Position = pos;
                 m_Rectangle.X = (int)pos.X;
                 m_Rectangle.Y = (int)pos.Y;
-            }
+            //}
         }
         public void SetBulletTexture(Texture2D texture) { m_BulletTexture = texture; }
         public void SetHealth(float health) { m_Health = health; }
@@ -115,10 +116,11 @@ namespace SpaceShooter.Gameplay.Player
             SetPosition(GetPosition() + dir * m_CurrentSpeed * mul);
             Vector2 pos = GetPosition();
 
-            if (m_Camera.WorldToScreenCoords(ref pos).Y > (m_Graphics.PreferredBackBufferHeight / 1.33) || m_Camera.WorldToScreenCoords(ref pos).Y < (m_Graphics.PreferredBackBufferHeight / 2.33)
-                || m_Camera.WorldToScreenCoords(ref pos).X > (m_Graphics.PreferredBackBufferWidth / 1.33) || m_Camera.WorldToScreenCoords(ref pos).X < (m_Graphics.PreferredBackBufferWidth / 2.33)) 
+            Vector2 movePosLeft = Vector2.Transform(new Vector2(m_Graphics.PreferredBackBufferWidth / 7 * 6, m_Graphics.PreferredBackBufferHeight / 6 * 6), Matrix.Invert(m_Camera.GetTransform()));
+            Vector2 movePosRight = Vector2.Transform(new Vector2(m_Graphics.PreferredBackBufferWidth / 7, m_Graphics.PreferredBackBufferHeight / 7), Matrix.Invert(m_Camera.GetTransform()));
+            if (m_Position.X > movePosLeft.X || m_Position.X < movePosRight.X || m_Position.Y < movePosRight.Y || m_Position.Y > movePosLeft.Y)
             {
-                //m_Camera.Move(dir * m_CurrentSpeed);
+                m_Camera.Move(dir * m_CurrentSpeed);
             }
             base.Move(speed, mul);
         }

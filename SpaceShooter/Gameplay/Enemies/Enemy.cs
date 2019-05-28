@@ -24,8 +24,8 @@ namespace SpaceShooter.Gameplay.Enemies
         private bool m_ShootTimerStarted = false;
 
         private Texture2D m_EmptyTexture;
-        private float m_Health = 100f;
-        private float m_MaxHealth = 100f;
+        private float m_Health = 50f;
+        private float m_MaxHealth = 50f;
 
         private int m_KillScore = 10;
         private EState m_State;
@@ -63,6 +63,10 @@ namespace SpaceShooter.Gameplay.Enemies
         {
             m_Rectangle = new Rectangle((int)m_Position.X, (int)m_Position.Y, m_Texture.Width, m_Texture.Height);
 
+            if (m_Health < 40f)
+            {
+                m_State = EState.eS_Flee;
+            }
             if (Vector2.Distance(m_PlayerPosition, m_Position) < 1000 && !m_ShootTimerStarted)
             {
                 SetTimer(2000);
@@ -88,7 +92,11 @@ namespace SpaceShooter.Gameplay.Enemies
             }
             else if (m_State == EState.eS_Flee)
             {
+                Vector2 dir = (m_PlayerPosition - new Vector2(1000, 800)) - m_Position;
+                dir.Normalize();
 
+                m_Rotation = (float)Math.Atan2(dir.Y, dir.X);
+                SetPosition(GetPosition() + dir * speed * mul);
             }
             base.Move(speed, mul);
         }

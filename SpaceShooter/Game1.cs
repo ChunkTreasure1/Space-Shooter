@@ -39,6 +39,7 @@ namespace SpaceShooter
         private EGameState m_GameState;
         private Camera2D m_Camera;
         private EnemySpawner m_EnemySpawner;
+        private Spawner m_Spawner;
 
         private int m_Width;
         private int m_Height;
@@ -69,9 +70,11 @@ namespace SpaceShooter
             m_Graphics.ApplyChanges();
 
             m_Camera = new Camera2D(m_Width, m_Height);
+            m_Camera.Position = new Vector2(0, 0);
             m_GameState = EGameState.eGS_Playing;
             m_Player = new Player(new Vector2(100, 100), 0, 1f, null, new Rectangle(0, 0, 0, 0), m_Graphics, 10, m_Camera);
             m_EnemySpawner = new EnemySpawner(ref m_Enemies, 2000, m_Graphics);
+            m_Spawner = new Spawner(m_Player, 10000, m_Graphics);
 
             base.Initialize();
         }
@@ -92,9 +95,12 @@ namespace SpaceShooter
             m_Player.SetTexture(Content.Load<Texture2D>("Images/PlayerShip"));
             m_Player.SetEmptyTexture(m_EmptyTexture);
             m_Player.SetBulletTexture(bullet);
+
             m_EnemySpawner.SetTexture(Content.Load<Texture2D>("Images/EnemyShip"));
             m_EnemySpawner.SetEmptyTexture(m_EmptyTexture);
             m_EnemySpawner.SetBulletTexture(bullet);
+
+            m_Spawner.SetHealthTexture(Content.Load<Texture2D>("Images/health"));
 
             //Fonts
             m_Font = Content.Load<SpriteFont>("Fonts/Roboto");
@@ -129,7 +135,7 @@ namespace SpaceShooter
             {
                 return;
             }
-            else if(m_GameState == EGameState.eGS_Playing)
+            else if (m_GameState == EGameState.eGS_Playing)
             {
                 UpdateEntities(gameTime);
             }
@@ -151,18 +157,16 @@ namespace SpaceShooter
                 GraphicsDevice.Clear(Color.Black);
             }
 
-            Vector3 screenScale = GetScreenScale();
-            Matrix viewMatrix = m_Camera.GetTransform();
-
-            m_SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, null, null, null, null, viewMatrix * Matrix.CreateScale(screenScale));
+            m_SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, null, null, null, null, m_Camera.GetTransform());
+            Vector2 middlePos = TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width / 2 - 50, GraphicsDevice.DisplayMode.Height / 2));
 
             if (m_GameState == EGameState.eGS_Paused)
             {
-                m_SpriteBatch.DrawString(m_Font, "PAUSED", new Vector2(GraphicsDevice.DisplayMode.Width / 2, GraphicsDevice.DisplayMode.Height / 2), Color.White);
+                m_SpriteBatch.DrawString(m_Font, "PAUSED", middlePos, Color.White);
             }
-            else if(m_GameState == EGameState.eGS_GameOver)
+            else if (m_GameState == EGameState.eGS_GameOver)
             {
-                m_SpriteBatch.DrawString(m_Font, "GAME OVER", new Vector2(GraphicsDevice.DisplayMode.Width / 2, GraphicsDevice.DisplayMode.Height / 2), Color.White);
+                m_SpriteBatch.DrawString(m_Font, "GAME OVER", middlePos, Color.White);
             }
 
             //Draw the player
@@ -175,9 +179,15 @@ namespace SpaceShooter
                 }
             }
 
-            m_SpriteBatch.DrawString(m_Font, "FPS: " + 1 / (float)gameTime.ElapsedGameTime.TotalSeconds, new Vector2(100, 100), Color.White);
-            m_SpriteBatch.DrawString(m_Font, "Score: " + m_Player.GetScore(), new Vector2(GraphicsDevice.DisplayMode.Width - 200, 100), Color.White);
-            m_SpriteBatch.DrawString(m_Font, "Level: " + m_EnemySpawner.GetLevel(), new Vector2(GraphicsDevice.DisplayMode.Width - 200, 150), Color.White);
+            m_SpriteBatch.DrawString(m_Font, "FPS: " + 1 / (float)gameTime.ElapsedGameTime.TotalSeconds, TransformVector(new Vector2(100, 100)), Color.White);
+            m_SpriteBatch.DrawString(m_Font, "Score: " + m_Player.GetScore(), TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width - 200, 100)), Color.White);
+            m_SpriteBatch.DrawString(m_Font, "Level: " + m_EnemySpawner.GetLevel(), TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width - 200, 150)), Color.White);
+
+            //Draw pickups
+            for (int i = 0; i < m_Spawner.GetHealthPickups().Count; i++)
+            {
+                m_Spawner.GetHealthPickups()[i].Draw(ref m_SpriteBatch);
+            }
 
             m_SpriteBatch.End();
             base.Draw(gameTime);
@@ -224,16 +234,7 @@ namespace SpaceShooter
                     {
                         for (int j = 0; j < m_Enemies[i].GetBullets().Count; j++)
                         {
-                            if (m_Enemies[i].GetBullets()[j].GetPosition().X > m_Graphics.PreferredBackBufferWidth || m_Enemies[i].GetBullets()[j].GetPosition().X < 0 ||
-                                m_Enemies[i].GetBullets()[j].GetPosition().Y > m_Graphics.PreferredBackBufferHeight || m_Enemies[i].GetBullets()[j].GetPosition().Y < 0)
-                            {
-                                m_Enemies[i].GetBullets().RemoveAt(j);
-                                j--;
-                            }
-                            else
-                            {
-                                m_Enemies[i].GetBullets()[j].Update(gameTime);
-                            }
+                            m_Enemies[i].GetBullets()[j].Update(gameTime);
                         }
                     }
                 }
@@ -244,16 +245,7 @@ namespace SpaceShooter
             {
                 for (int i = 0; i < m_Player.GetBullets().Count; i++)
                 {
-                    if (m_Player.GetBullets()[i].GetPosition().X > m_Graphics.PreferredBackBufferWidth || m_Player.GetBullets()[i].GetPosition().X < 0 ||
-                        m_Player.GetBullets()[i].GetPosition().Y > m_Graphics.PreferredBackBufferHeight || m_Player.GetBullets()[i].GetPosition().Y < 0)
-                    {
-                        m_Player.GetBullets().RemoveAt(i);
-                        i--;
-                    }
-                    else
-                    {
-                        m_Player.GetBullets()[i].Update(gameTime);
-                    }
+                    m_Player.GetBullets()[i].Update(gameTime);
                 }
             }
 
@@ -355,11 +347,9 @@ namespace SpaceShooter
             return false;
         }
 
-        public Vector3 GetScreenScale()
+        public Vector2 TransformVector(Vector2 vector)
         {
-            var scaleX = (float)GraphicsDevice.DisplayMode.Width / (float)m_Width;
-            var scaleY = (float)GraphicsDevice.DisplayMode.Height / (float)m_Height;
-            return new Vector3(scaleX, scaleY, 1.0f);
+            return Vector2.Transform(vector, Matrix.Invert(m_Camera.GetTransform()));
         }
     }
 }

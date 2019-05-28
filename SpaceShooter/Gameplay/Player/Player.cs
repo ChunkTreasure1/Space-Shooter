@@ -125,6 +125,7 @@ namespace SpaceShooter.Gameplay.Player
         public override void Update(GameTime gameTime)
         {
             GetInput();
+            m_Rectangle = new Rectangle((int)m_Position.X, (int)m_Position.Y, m_Texture.Width, m_Texture.Height);
             base.Update(gameTime);
         }
         private void GetInput()

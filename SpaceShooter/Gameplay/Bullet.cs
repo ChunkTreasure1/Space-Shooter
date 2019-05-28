@@ -33,6 +33,7 @@ namespace SpaceShooter.Gameplay
         public override void Update(GameTime gameTime)
         {
             Move(m_Speed, 2);
+            m_Rectangle = new Rectangle((int)m_Position.X, (int)m_Position.Y, m_Texture.Width, m_Texture.Height);
             base.Update(gameTime);
         }
 

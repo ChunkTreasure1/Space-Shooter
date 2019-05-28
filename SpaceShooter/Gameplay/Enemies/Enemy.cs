@@ -9,6 +9,12 @@ namespace SpaceShooter.Gameplay.Enemies
 {
     public class Enemy : Entity
     {
+        public enum EState
+        {
+            eS_Fight,
+            eS_Flee
+        }
+
         private float m_Speed;
         private Vector2 m_PlayerPosition;
         private Timer m_Timer;
@@ -22,6 +28,7 @@ namespace SpaceShooter.Gameplay.Enemies
         private float m_MaxHealth = 100f;
 
         private int m_KillScore = 10;
+        private EState m_State;
 
         //Getting
         public List<Bullet> GetBullets() { return m_Bullets; }
@@ -46,12 +53,16 @@ namespace SpaceShooter.Gameplay.Enemies
             m_Speed = speed;
             m_Graphics = graphics;
             m_EmptyTexture = emptyTexture;
+
+            m_State = EState.eS_Fight;
         }
 
         public void SetPlayerPosition(Vector2 pos) { m_PlayerPosition = pos; }
 
         public override void Update(GameTime gameTime)
         {
+            m_Rectangle = new Rectangle((int)m_Position.X, (int)m_Position.Y, m_Texture.Width, m_Texture.Height);
+
             if (Vector2.Distance(m_PlayerPosition, m_Position) < 1000 && !m_ShootTimerStarted)
             {
                 SetTimer(2000);
@@ -64,14 +75,20 @@ namespace SpaceShooter.Gameplay.Enemies
 
         public override void Move(float speed, float mul)
         {
-            Vector2 dir = m_PlayerPosition - m_Position;
-            dir.Normalize();
-
-            m_Rotation = (float)Math.Atan2(dir.Y, dir.X);
-
-            if (Vector2.Distance(m_PlayerPosition, m_Position) > 450)
+            if (m_State == EState.eS_Fight)
             {
-                SetPosition(GetPosition() + dir * speed * mul);
+                Vector2 dir = m_PlayerPosition - m_Position;
+                dir.Normalize();
+
+                m_Rotation = (float)Math.Atan2(dir.Y, dir.X);
+                if (Vector2.Distance(m_PlayerPosition, m_Position) > 450)
+                {
+                    SetPosition(GetPosition() + dir * speed * mul);
+                }
+            }
+            else if (m_State == EState.eS_Flee)
+            {
+
             }
             base.Move(speed, mul);
         }

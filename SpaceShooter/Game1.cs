@@ -32,14 +32,19 @@ namespace SpaceShooter
         private Texture2D m_EmptyTexture;
 
         private bool m_Collision = false;
-        private bool m_CreatedEnemy = false;
         private bool m_EscPushed = false;
 
         private SpriteFont m_Font;
         private EGameState m_GameState;
         private Camera2D m_Camera;
+
         private EnemySpawner m_EnemySpawner;
         private Spawner m_Spawner;
+        private Random m_Random = new Random();
+
+        private Vector2 m_LastAsteroidCreation;
+        private List<Asteroid> m_Asteroids = new List<Asteroid>();
+        private Texture2D m_Asteroid;
 
         private int m_Width;
         private int m_Height;
@@ -72,7 +77,10 @@ namespace SpaceShooter
             m_Camera = new Camera2D(m_Width, m_Height);
             m_Camera.Position = new Vector2(0, 0);
             m_GameState = EGameState.eGS_Playing;
+
             m_Player = new Player(new Vector2(100, 100), 0, 1f, null, new Rectangle(0, 0, 0, 0), m_Graphics, 10, m_Camera);
+            m_LastAsteroidCreation = m_Player.GetPosition();
+
             m_EnemySpawner = new EnemySpawner(ref m_Enemies, 2000, m_Graphics);
             m_Spawner = new Spawner(m_Player, 10000, m_Graphics);
 
@@ -101,6 +109,7 @@ namespace SpaceShooter
             m_EnemySpawner.SetBulletTexture(bullet);
 
             m_Spawner.SetHealthTexture(Content.Load<Texture2D>("Images/health"));
+            m_Asteroid = Content.Load<Texture2D>("Images/Asteroid");
 
             //Fonts
             m_Font = Content.Load<SpriteFont>("Fonts/Roboto");
@@ -111,6 +120,7 @@ namespace SpaceShooter
                                                 m_Player.GetTexture().Height));
 
             m_Player.LoadTextureData();
+            CreateAsteroids();
         }
 
         /// <summary>
@@ -189,6 +199,12 @@ namespace SpaceShooter
                 m_Spawner.GetHealthPickups()[i].Draw(ref m_SpriteBatch);
             }
 
+            //Draw asteroids
+            for (int i = 0; i < m_Asteroids.Count; i++)
+            {
+                m_Asteroids[i].Draw(ref m_SpriteBatch);
+            }
+
             m_SpriteBatch.End();
             base.Draw(gameTime);
         }
@@ -246,6 +262,15 @@ namespace SpaceShooter
                 for (int i = 0; i < m_Player.GetBullets().Count; i++)
                 {
                     m_Player.GetBullets()[i].Update(gameTime);
+                }
+            }
+
+            //Update asteroids
+            if (m_Asteroids.Count > 0)
+            {
+                for (int i = 0; i < m_Asteroids.Count; i++)
+                {
+                    m_Asteroids[i].Update(gameTime);
                 }
             }
 
@@ -320,6 +345,19 @@ namespace SpaceShooter
                     }
                 }
             }
+
+            //Check for asteroid collision
+            for (int i = 0; i < m_Asteroids.Count; i++)
+            {
+                if (IntersectsPixel(m_Player.GetRectangle(), m_Player.GetTextureData(), m_Asteroids[i].GetRectangle(), m_Asteroids[i].GetTextureData()))
+                {
+                    m_Player.SetHealth(m_Player.GetHealth() - 10f);
+                    if (m_Player.GetHealth() <= 0)
+                    {
+                        m_GameState = EGameState.eGS_GameOver;
+                    }
+                }
+            }
         }
         static bool IntersectsPixel(Rectangle rect1, Color[] data1,
                                     Rectangle rect2, Color[] data2)
@@ -350,6 +388,17 @@ namespace SpaceShooter
         public Vector2 TransformVector(Vector2 vector)
         {
             return Vector2.Transform(vector, Matrix.Invert(m_Camera.GetTransform()));
+        }
+
+        private void CreateAsteroids()
+        {
+            for (int i = 0; i < 200; i++)
+            {
+                Vector2 pos = new Vector2(m_Player.GetPosition().X + m_Random.Next((int)m_Player.GetPosition().X - 4000, (int)m_Player.GetPosition().X + 4000), m_Player.GetPosition().Y + m_Random.Next((int)m_Player.GetPosition().Y - 4000, (int)m_Player.GetPosition().Y + 4000));
+
+                m_Asteroids.Add(new Asteroid(pos, 0, 1, m_Asteroid, new Rectangle((int)pos.X, (int)pos.Y, m_Asteroid.Width, m_Asteroid.Height), m_Graphics));
+                m_Asteroids[m_Asteroids.Count - 1].LoadTextureData();
+            }
         }
     }
 }

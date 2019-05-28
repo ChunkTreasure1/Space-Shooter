@@ -20,8 +20,8 @@ namespace SpaceShooter.Gameplay.Player
         private Texture2D m_BulletTexture;
         private List<Bullet> m_Bullets = new List<Bullet>();
 
-        private float m_Health = 100f;
-        private float m_MaxHealth = 100f;
+        private float m_Health = 300;
+        private float m_MaxHealth = 300f;
         private Texture2D m_EmptyTexture;
 
         private int m_KillCount = 0;

@@ -97,6 +97,8 @@ namespace SpaceShooter
             m_Spawner = new Spawner(m_Player, 5000, m_Graphics);
             m_Background = new Background(new Vector2(0, 0), m_Player);
 
+            this.IsMouseVisible = true;
+
             base.Initialize();
         }
 
@@ -194,9 +196,9 @@ namespace SpaceShooter
             if (m_GameState == EGameState.eGS_Menu)
             {
                 m_SpriteBatch.Draw(m_MenuBackground, new Rectangle(-(m_Graphics.PreferredBackBufferWidth / 2), -(m_Graphics.PreferredBackBufferHeight / 2), m_Graphics.PreferredBackBufferWidth, m_Graphics.PreferredBackBufferHeight), Color.White);
-                m_SpriteBatch.Draw(m_StartButton, TransformVector(new Vector2(m_Graphics.PreferredBackBufferWidth / 2, m_Graphics.PreferredBackBufferHeight - 400)), Color.White);
+                m_SpriteBatch.Draw(m_StartButton, TransformVector(new Vector2(m_Graphics.PreferredBackBufferWidth / 2 - m_StartButton.Width / 2, m_Graphics.PreferredBackBufferHeight - 200)), Color.White);
             }
-            else if(m_GameState == EGameState.eGS_Playing)
+            else
             {
                 m_Background.Draw(ref m_SpriteBatch);
 
@@ -204,11 +206,14 @@ namespace SpaceShooter
                 if (m_GameState == EGameState.eGS_Paused)
                 {
                     m_SpriteBatch.DrawString(m_Font, "PAUSED", middlePos, Color.White);
+                    m_SpriteBatch.End();
                     return;
                 }
                 else if (m_GameState == EGameState.eGS_GameOver)
                 {
-                    m_SpriteBatch.DrawString(m_Font, "GAME OVER", middlePos, Color.White);
+                    m_SpriteBatch.DrawString(m_Font, "GAME OVER", middlePos, Color.Red);
+                    m_SpriteBatch.DrawString(m_Font, "Score: " + m_Player.GetScore(), new Vector2(middlePos.X, middlePos.Y + 50), Color.Red);
+                    m_SpriteBatch.End();
                     return;
                 }
 
@@ -258,24 +263,46 @@ namespace SpaceShooter
         //Gets the players input
         private void GetInput(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (m_GameState == EGameState.eGS_Menu)
             {
-                if (!m_EscPushed)
+                if (Mouse.GetState().X > m_Graphics.PreferredBackBufferWidth / 2 - m_StartButton.Width / 2 && Mouse.GetState().X < m_Graphics.PreferredBackBufferWidth / 2 + m_StartButton.Width / 2 &&
+                    Mouse.GetState().Y > m_Graphics.PreferredBackBufferHeight - 200 && Mouse.GetState().Y < m_Graphics.PreferredBackBufferHeight - 200 + m_StartButton.Height) 
                 {
-                    m_EscPushed = true;
-                    if (m_GameState == EGameState.eGS_Paused)
+                    if (Mouse.GetState().LeftButton == ButtonState.Pressed)
                     {
                         m_GameState = EGameState.eGS_Playing;
                     }
-                    else
-                    {
-                        m_GameState = EGameState.eGS_Paused;
-                    }
                 }
             }
-            if (Keyboard.GetState().IsKeyUp(Keys.Escape))
+            else if(m_GameState == EGameState.eGS_GameOver)
             {
-                m_EscPushed = false;
+                if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+                {
+                    System.Diagnostics.Process.Start(System.AppDomain.CurrentDomain.FriendlyName);
+                    Exit();
+                }
+            }
+            else
+            {
+                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                {
+                    if (!m_EscPushed)
+                    {
+                        m_EscPushed = true;
+                        if (m_GameState == EGameState.eGS_Paused)
+                        {
+                            m_GameState = EGameState.eGS_Playing;
+                        }
+                        else
+                        {
+                            m_GameState = EGameState.eGS_Paused;
+                        }
+                    }
+                }
+                if (Keyboard.GetState().IsKeyUp(Keys.Escape))
+                {
+                    m_EscPushed = false;
+                }
             }
         }
 

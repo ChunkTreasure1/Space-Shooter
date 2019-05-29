@@ -73,6 +73,7 @@ namespace SpaceShooter.Gameplay.Enemies
                 m_EnemyList[m_EnemyList.Count - 1].SetBulletTexture(m_BulletTexture);
                 m_EnemyList[m_EnemyList.Count - 1].SetShootSound(m_ShootSound);
                 m_EnemyList[m_EnemyList.Count - 1].SetBulletDamage(m_Level * 10);
+                m_EnemyList[m_EnemyList.Count - 1].SetMaxHealth(m_Level * 30);
             }
             m_Timer.Enabled = false;
             m_Timer.Dispose();

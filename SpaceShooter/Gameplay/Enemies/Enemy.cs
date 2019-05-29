@@ -41,6 +41,7 @@ namespace SpaceShooter.Gameplay.Enemies
         //Setting
         public void SetBulletTexture(Texture2D texture) { m_BulletTexture = texture; }
         public void SetHealth(float health) { m_Health = health; }
+        public void SetMaxHealth(float health) { m_MaxHealth = health; m_Health = health; }
         public void SetKillScore(int i) { m_KillScore = i; }
         public void SetShootSound(SoundEffect sound) { m_ShootSound = sound; }
         public void SetBulletDamage(float amount) { m_BulletDamage = amount; }

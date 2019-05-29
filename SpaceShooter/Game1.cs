@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
 
 using System.Collections.Generic;
 using SpaceShooter.Gameplay.Player;
@@ -29,8 +30,10 @@ namespace SpaceShooter
         private Player m_Player;
 
         private List<Enemy> m_Enemies = new List<Enemy>();
+        private List<Explosion> m_Explosions = new List<Explosion>();
         private Texture2D m_EmptyTexture;
 
+        private Texture2D m_Explosion;
         private bool m_Collision = false;
         private bool m_EscPushed = false;
 
@@ -48,6 +51,9 @@ namespace SpaceShooter
 
         private int m_Width;
         private int m_Height;
+
+        private SoundEffect m_ExplosionSound;
+        private Background m_Background;
 
         public Game1()
         {
@@ -82,7 +88,8 @@ namespace SpaceShooter
             m_LastAsteroidCreation = m_Player.GetPosition();
 
             m_EnemySpawner = new EnemySpawner(ref m_Enemies, 2000, m_Graphics, m_Player);
-            m_Spawner = new Spawner(m_Player, 10000, m_Graphics);
+            m_Spawner = new Spawner(m_Player, 5000, m_Graphics);
+            m_Background = new Background(new Vector2(0, 0), m_Player);
 
             base.Initialize();
         }
@@ -110,6 +117,13 @@ namespace SpaceShooter
 
             m_Spawner.SetHealthTexture(Content.Load<Texture2D>("Images/health"));
             m_Asteroid = Content.Load<Texture2D>("Images/Asteroid");
+            m_Explosion = Content.Load<Texture2D>("Images/explosion");
+
+            m_Background.SetTexture(Content.Load<Texture2D>("Images/background"));
+            m_Background.Start();
+
+            //Audio
+            m_ExplosionSound = Content.Load<SoundEffect>("Audio/explosionSound");
 
             //Fonts
             m_Font = Content.Load<SpriteFont>("Fonts/Roboto");
@@ -118,8 +132,8 @@ namespace SpaceShooter
                                                 (int)m_Player.GetPosition().Y,
                                                 m_Player.GetTexture().Width,
                                                 m_Player.GetTexture().Height));
-
             m_Player.LoadTextureData();
+
             CreateAsteroids();
         }
 
@@ -158,18 +172,13 @@ namespace SpaceShooter
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            if (m_Collision)
-            {
-                GraphicsDevice.Clear(Color.Red);
-            }
-            else
-            {
-                GraphicsDevice.Clear(Color.Black);
-            }
+            GraphicsDevice.Clear(Color.Black);
 
             m_SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, null, null, null, null, m_Camera.GetTransform());
-            Vector2 middlePos = TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width / 2 - 50, GraphicsDevice.DisplayMode.Height / 2));
+            m_Background.Draw(ref m_SpriteBatch);
 
+
+            Vector2 middlePos = TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width / 2 - 50, GraphicsDevice.DisplayMode.Height / 2));
             if (m_GameState == EGameState.eGS_Paused)
             {
                 m_SpriteBatch.DrawString(m_Font, "PAUSED", middlePos, Color.White);
@@ -179,8 +188,6 @@ namespace SpaceShooter
                 m_SpriteBatch.DrawString(m_Font, "GAME OVER", middlePos, Color.White);
             }
 
-            //Draw the player
-            m_Player.Draw(ref m_SpriteBatch);
             if (m_Enemies.Count > 0)
             {
                 for (int i = 0; i < m_Enemies.Count; i++)
@@ -188,10 +195,6 @@ namespace SpaceShooter
                     m_Enemies[i].Draw(ref m_SpriteBatch);
                 }
             }
-
-            m_SpriteBatch.DrawString(m_Font, "FPS: " + 1 / (float)gameTime.ElapsedGameTime.TotalSeconds, TransformVector(new Vector2(100, 100)), Color.White);
-            m_SpriteBatch.DrawString(m_Font, "Score: " + m_Player.GetScore(), TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width - 200, 100)), Color.White);
-            m_SpriteBatch.DrawString(m_Font, "Level: " + m_EnemySpawner.GetLevel(), TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width - 200, 150)), Color.White);
 
             //Draw pickups
             for (int i = 0; i < m_Spawner.GetHealthPickups().Count; i++)
@@ -204,6 +207,22 @@ namespace SpaceShooter
             {
                 m_Asteroids[i].Draw(ref m_SpriteBatch);
             }
+
+            //Draw explosions
+            if (m_Explosions.Count > 0)
+            {
+                for (int i = 0; i < m_Explosions.Count; i++)
+                {
+                    m_Explosions[i].Draw(m_SpriteBatch);
+                }
+            }
+
+            m_SpriteBatch.DrawString(m_Font, "FPS: " + 1 / (float)gameTime.ElapsedGameTime.TotalSeconds, TransformVector(new Vector2(100, 100)), Color.White);
+            m_SpriteBatch.DrawString(m_Font, "Score: " + m_Player.GetScore(), TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width - 200, 100)), Color.White);
+            m_SpriteBatch.DrawString(m_Font, "Level: " + m_EnemySpawner.GetLevel(), TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width - 200, 150)), Color.White);
+
+            //Draw the player
+            m_Player.Draw(ref m_SpriteBatch);
 
             m_SpriteBatch.End();
             base.Draw(gameTime);
@@ -261,7 +280,18 @@ namespace SpaceShooter
             {
                 for (int i = 0; i < m_Player.GetBullets().Count; i++)
                 {
-                    m_Player.GetBullets()[i].Update(gameTime);
+                    if (Vector2.Distance(m_Player.GetPosition(), m_Player.GetBullets()[i].GetPosition()) > 1500)
+                    {
+                        m_Player.GetBullets().RemoveAt(i);
+                        if (i > 0)
+                        {
+                            i--;
+                        }
+                    }
+                    else
+                    {
+                        m_Player.GetBullets()[i].Update(gameTime);
+                    }
                 }
             }
 
@@ -271,6 +301,24 @@ namespace SpaceShooter
                 for (int i = 0; i < m_Asteroids.Count; i++)
                 {
                     m_Asteroids[i].Update(gameTime);
+                }
+            }
+
+            //Update Health pickups
+            if (m_Spawner.GetHealthPickups().Count > 0)
+            {
+                for (int i = 0; i < m_Spawner.GetHealthPickups().Count; i++)
+                {
+                    m_Spawner.GetHealthPickups()[i].Update();
+                }
+            }
+
+            //Update explosions
+            if (m_Explosions.Count > 0)
+            {
+                for (int i = 0; i < m_Explosions.Count; i++)
+                {
+                    m_Explosions[i].Update(gameTime);
                 }
             }
 
@@ -294,6 +342,8 @@ namespace SpaceShooter
                         {
                             m_Player.SetKillCount(m_Player.GetKills() + 1);
                             m_Player.SetScore(m_Player.GetScore() + m_Enemies[j].GetKillScore());
+                            m_Explosions.Add(new Explosion(m_Explosion, m_Enemies[j].GetPosition()));
+                            m_ExplosionSound.Play();
                             m_Enemies.RemoveAt(j);
                         }
                         m_Player.GetBullets().RemoveAt(i);
@@ -320,9 +370,16 @@ namespace SpaceShooter
                     {
                         i = 0;
                     }
+                    if (m_Asteroids.Count == 0)
+                    {
+                        break;
+                    }
                     if (IntersectsPixel(m_Player.GetBullets()[i].GetRectangle(), m_Player.GetBullets()[i].GetTextureData(), m_Asteroids[j].GetRectangle(), m_Asteroids[j].GetTextureData()))
                     {
                         m_Player.GetBullets().RemoveAt(i);
+
+                        m_Explosions.Add(new Explosion(m_Explosion, m_Asteroids[j].GetPosition()));
+                        m_ExplosionSound.Play();
                         m_Asteroids.RemoveAt(j);
 
                         if (m_Player.GetBullets().Count < 1 || m_Asteroids.Count < 1)
@@ -381,6 +438,24 @@ namespace SpaceShooter
                     }
                 }
             }
+
+            //Check for health collision
+            for (int i = 0; i < m_Spawner.GetHealthPickups().Count; i++)
+            {
+                if (IntersectsPixel(m_Player.GetRectangle(), m_Player.GetTextureData(), m_Spawner.GetHealthPickups()[i].GetRectangle(), m_Spawner.GetHealthPickups()[i].GetTextureData()))
+                {
+                    m_Spawner.GetHealthPickups()[i].Use(m_Player);
+                    m_Spawner.GetHealthPickups().RemoveAt(i);
+                    i--;
+                }
+            }
+
+            //Create new asteroids
+            if (Vector2.Distance(m_Player.GetPosition(), m_LastAsteroidCreation) > 4000)
+            {
+                m_Asteroids.Clear();
+                CreateAsteroids();
+            }
         }
         static bool IntersectsPixel(Rectangle rect1, Color[] data1,
                                     Rectangle rect2, Color[] data2)
@@ -415,6 +490,8 @@ namespace SpaceShooter
 
         private void CreateAsteroids()
         {
+            m_LastAsteroidCreation = m_Player.GetPosition();
+
             for (int i = 0; i < 200; i++)
             {
                 Vector2 pos = new Vector2(m_Player.GetPosition().X + m_Random.Next((int)m_Player.GetPosition().X - 4000, (int)m_Player.GetPosition().X + 4000), m_Player.GetPosition().Y + m_Random.Next((int)m_Player.GetPosition().Y - 4000, (int)m_Player.GetPosition().Y + 4000));

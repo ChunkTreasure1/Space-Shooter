@@ -15,6 +15,7 @@ namespace SpaceShooter.Gameplay.Pickups
             m_Rectangle = rect;
 
             m_Graphics = graphics;
+            m_HealthAdd = 100;
         }
 
         public void Use(Player.Player player)

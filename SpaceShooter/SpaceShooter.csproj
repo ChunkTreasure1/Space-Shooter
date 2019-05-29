@@ -46,11 +46,13 @@
   <ItemGroup>
     <Compile Include="Game1.cs" />
     <Compile Include="Gameplay\Asteroid.cs" />
+    <Compile Include="Gameplay\Background.cs" />
     <Compile Include="Gameplay\Bullet.cs" />
     <Compile Include="Gameplay\Camera2D.cs" />
     <Compile Include="Gameplay\Enemies\Enemy.cs" />
     <Compile Include="Gameplay\Enemies\EnemySpawner.cs" />
     <Compile Include="Gameplay\Entity.cs" />
+    <Compile Include="Gameplay\Explosion.cs" />
     <Compile Include="Gameplay\Pickups\HealthPickup.cs" />
     <Compile Include="Gameplay\Pickups\Pickup.cs" />
     <Compile Include="Gameplay\Player\Player.cs" />

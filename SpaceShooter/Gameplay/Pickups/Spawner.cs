@@ -50,21 +50,22 @@ namespace SpaceShooter.Gameplay
         {
             Vector2 pos = GetRandomPosition();
             m_HealthPickups.Add(new HealthPickup(pos, m_HealthTexture, new Rectangle((int)pos.X, (int)pos.Y, m_HealthTexture.Width, m_HealthTexture.Height), m_Graphics));
+            m_HealthPickups[m_HealthPickups.Count - 1].LoadTextureData();
         }
 
         private Vector2 GetRandomPosition()
         {
             Random random = new Random();
-            int X = random.Next((int)m_Player.GetPosition().X - 2000, (int)m_Player.GetPosition().X + 2000);
+            int X = random.Next((int)m_Player.GetPosition().X - 1000, (int)m_Player.GetPosition().X + 1000);
             int Y;
 
             if (random.Next(0, 2) == 0)
             {
-                Y = random.Next((int)m_Player.GetPosition().Y - 2000, (int)m_Player.GetPosition().Y - 1000);
+                Y = random.Next((int)m_Player.GetPosition().Y - 1000, (int)m_Player.GetPosition().Y - 500);
             }
             else
             {
-                Y = random.Next((int)m_Player.GetPosition().Y + 1000, (int)m_Player.GetPosition().Y + 2000);
+                Y = random.Next((int)m_Player.GetPosition().Y + 500, (int)m_Player.GetPosition().Y + 1000);
             }
 
             return new Vector2(X, Y);

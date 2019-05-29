@@ -13,6 +13,9 @@ namespace SpaceShooter.Gameplay
         protected GraphicsDeviceManager m_Graphics;
         protected float m_Rotation;
 
+        protected int m_RotationFrames = 1;
+        protected int m_CurrFrames = 0;
+
         //Getting
         public Vector2 GetPosition() { return m_Position; }
         public Rectangle GetRectangle() { return m_Rectangle; }
@@ -45,11 +48,12 @@ namespace SpaceShooter.Gameplay
             Rectangle rect = new Rectangle(0, 0, m_Texture.Width, m_Texture.Height);
             Vector2 origin = new Vector2(m_Texture.Width / 2, m_Texture.Height / 2);
 
-            spriteBatch.Draw(m_Texture, m_Position, rect, Color.White, m_Rotation + MathHelper.ToRadians(90), origin, 1, SpriteEffects.None, 1);
+            spriteBatch.Draw(m_Texture, m_Position, rect, Color.White, m_Rotation, origin, 1, SpriteEffects.None, 1);
         }
 
         public virtual void Update()
-        {}
+        {
+        }
 
         public void LoadTextureData()
         {

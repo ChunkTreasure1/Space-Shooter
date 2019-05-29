@@ -76,7 +76,7 @@ namespace SpaceShooter.Gameplay.Player
             Rectangle rect = new Rectangle(0, 0, m_Texture.Width, m_Texture.Height);
             Vector2 origin = new Vector2(m_Texture.Width / 2, m_Texture.Height / 2);
 
-            spriteBatch.Draw(m_Texture, m_Position, rect, Color.White, m_Rotation + MathHelper.ToRadians(90), origin, m_Scale, SpriteEffects.None, 1);
+            spriteBatch.Draw(m_Texture, m_Position, rect, Color.White, m_Rotation + MathHelper.ToRadians(90), origin, m_Scale, SpriteEffects.None, 0);
 
             if (m_Health > m_MaxHealth / 2)
             {

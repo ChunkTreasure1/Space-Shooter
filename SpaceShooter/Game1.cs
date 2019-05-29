@@ -55,6 +55,10 @@ namespace SpaceShooter
         private SoundEffect m_ExplosionSound;
         private Background m_Background;
 
+        //Menu
+        private Texture2D m_MenuBackground;
+        private Texture2D m_StartButton;
+
         public static EGameState GetGameState() { return m_GameState; }
 
         public Game1()
@@ -84,7 +88,7 @@ namespace SpaceShooter
 
             m_Camera = new Camera2D(m_Width, m_Height);
             m_Camera.Position = new Vector2(0, 0);
-            m_GameState = EGameState.eGS_Playing;
+            m_GameState = EGameState.eGS_Menu;
 
             m_Player = new Player(new Vector2(100, 100), 0, 1f, null, new Rectangle(0, 0, 0, 0), m_Graphics, 10, m_Camera);
             m_LastAsteroidCreation = m_Player.GetPosition();
@@ -122,6 +126,8 @@ namespace SpaceShooter
             m_Asteroid = Content.Load<Texture2D>("Images/Asteroid");
             m_Explosion = Content.Load<Texture2D>("Images/explosion");
 
+            m_StartButton = Content.Load<Texture2D>("Images/StartButton");
+            m_MenuBackground = Content.Load<Texture2D>("Images/MenuBackground");
             m_Background.SetTexture(Content.Load<Texture2D>("Images/background"));
             m_Background.Start();
 
@@ -187,60 +193,63 @@ namespace SpaceShooter
             //Draw the menu if it's in the menu
             if (m_GameState == EGameState.eGS_Menu)
             {
-
+                m_SpriteBatch.Draw(m_MenuBackground, new Rectangle(-(m_Graphics.PreferredBackBufferWidth / 2), -(m_Graphics.PreferredBackBufferHeight / 2), m_Graphics.PreferredBackBufferWidth, m_Graphics.PreferredBackBufferHeight), Color.White);
+                m_SpriteBatch.Draw(m_StartButton, TransformVector(new Vector2(m_Graphics.PreferredBackBufferWidth / 2, m_Graphics.PreferredBackBufferHeight - 400)), Color.White);
             }
-
-            m_Background.Draw(ref m_SpriteBatch);
-
-            Vector2 middlePos = TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width / 2 - 50, GraphicsDevice.DisplayMode.Height / 2));
-            if (m_GameState == EGameState.eGS_Paused)
+            else if(m_GameState == EGameState.eGS_Playing)
             {
-                m_SpriteBatch.DrawString(m_Font, "PAUSED", middlePos, Color.White);
-                return;
-            }
-            else if (m_GameState == EGameState.eGS_GameOver)
-            {
-                m_SpriteBatch.DrawString(m_Font, "GAME OVER", middlePos, Color.White);
-                return;
-            }
+                m_Background.Draw(ref m_SpriteBatch);
 
-            if (m_Enemies.Count > 0)
-            {
-                for (int i = 0; i < m_Enemies.Count; i++)
+                Vector2 middlePos = TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width / 2 - 50, GraphicsDevice.DisplayMode.Height / 2));
+                if (m_GameState == EGameState.eGS_Paused)
                 {
-                    m_Enemies[i].Draw(ref m_SpriteBatch);
+                    m_SpriteBatch.DrawString(m_Font, "PAUSED", middlePos, Color.White);
+                    return;
                 }
-            }
-
-            //Draw pickups
-            for (int i = 0; i < m_Spawner.GetHealthPickups().Count; i++)
-            {
-                m_Spawner.GetHealthPickups()[i].Draw(ref m_SpriteBatch);
-            }
-
-            //Draw asteroids
-            for (int i = 0; i < m_Asteroids.Count; i++)
-            {
-                m_Asteroids[i].Draw(ref m_SpriteBatch);
-            }
-
-            //Draw explosions
-            if (m_Explosions.Count > 0)
-            {
-                for (int i = 0; i < m_Explosions.Count; i++)
+                else if (m_GameState == EGameState.eGS_GameOver)
                 {
-                    m_Explosions[i].Draw(m_SpriteBatch);
+                    m_SpriteBatch.DrawString(m_Font, "GAME OVER", middlePos, Color.White);
+                    return;
                 }
+
+                if (m_Enemies.Count > 0)
+                {
+                    for (int i = 0; i < m_Enemies.Count; i++)
+                    {
+                        m_Enemies[i].Draw(ref m_SpriteBatch);
+                    }
+                }
+
+                //Draw pickups
+                for (int i = 0; i < m_Spawner.GetHealthPickups().Count; i++)
+                {
+                    m_Spawner.GetHealthPickups()[i].Draw(ref m_SpriteBatch);
+                }
+
+                //Draw asteroids
+                for (int i = 0; i < m_Asteroids.Count; i++)
+                {
+                    m_Asteroids[i].Draw(ref m_SpriteBatch);
+                }
+
+                //Draw explosions
+                if (m_Explosions.Count > 0)
+                {
+                    for (int i = 0; i < m_Explosions.Count; i++)
+                    {
+                        m_Explosions[i].Draw(m_SpriteBatch);
+                    }
+                }
+
+                //Draw UI
+                m_SpriteBatch.DrawString(m_Font, "FPS: " + 1 / (float)gameTime.ElapsedGameTime.TotalSeconds, TransformVector(new Vector2(100, 100)), Color.White);
+                m_SpriteBatch.DrawString(m_Font, "Score: " + m_Player.GetScore(), TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width - 200, 100)), Color.White);
+                m_SpriteBatch.DrawString(m_Font, "Level: " + m_EnemySpawner.GetLevel(), TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width - 200, 150)), Color.White);
+                m_SpriteBatch.DrawString(m_Font, "Ammo: " + m_Player.GetCurrentAmmo(), TransformVector(new Vector2(100, GraphicsDevice.DisplayMode.Height - 100)), Color.White);
+
+                //Draw the player
+                m_Player.Draw(ref m_SpriteBatch);
             }
-
-            //Draw UI
-            m_SpriteBatch.DrawString(m_Font, "FPS: " + 1 / (float)gameTime.ElapsedGameTime.TotalSeconds, TransformVector(new Vector2(100, 100)), Color.White);
-            m_SpriteBatch.DrawString(m_Font, "Score: " + m_Player.GetScore(), TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width - 200, 100)), Color.White);
-            m_SpriteBatch.DrawString(m_Font, "Level: " + m_EnemySpawner.GetLevel(), TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width - 200, 150)), Color.White);
-            m_SpriteBatch.DrawString(m_Font, "Ammo: " + m_Player.GetCurrentAmmo(), TransformVector(new Vector2(100, GraphicsDevice.DisplayMode.Height - 100)), Color.White);
-
-            //Draw the player
-            m_Player.Draw(ref m_SpriteBatch);
 
             m_SpriteBatch.End();
             base.Draw(gameTime);

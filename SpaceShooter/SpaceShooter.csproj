@@ -53,6 +53,7 @@
     <Compile Include="Gameplay\Enemies\EnemySpawner.cs" />
     <Compile Include="Gameplay\Entity.cs" />
     <Compile Include="Gameplay\Explosion.cs" />
+    <Compile Include="Gameplay\Pickups\AmmoPickup.cs" />
     <Compile Include="Gameplay\Pickups\HealthPickup.cs" />
     <Compile Include="Gameplay\Pickups\Pickup.cs" />
     <Compile Include="Gameplay\Player\Player.cs" />

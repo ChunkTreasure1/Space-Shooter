@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Timers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Audio;
+
 namespace SpaceShooter.Gameplay.Enemies
 {
     class EnemySpawner
@@ -10,7 +12,6 @@ namespace SpaceShooter.Gameplay.Enemies
         //Private vars
         private int m_Level;
         private int m_Time;
-        private int m_KillCount = 0;
         private List<Enemy> m_EnemyList;
         private Timer m_Timer;
 
@@ -21,6 +22,10 @@ namespace SpaceShooter.Gameplay.Enemies
 
         private Player.Player m_Player;
         private Random m_Random = new Random();
+        private SoundEffect m_ShootSound;
+        private EGameState m_LastState;
+
+        private bool m_Paused = false;
 
         //Getting
         public int GetLevel() { return m_Level; }
@@ -29,6 +34,7 @@ namespace SpaceShooter.Gameplay.Enemies
         public void SetTexture(Texture2D texture) { m_EnemyTexture = texture; }
         public void SetBulletTexture(Texture2D texture) { m_BulletTexture = texture; }
         public void SetEmptyTexture(Texture2D texture) { m_EmptyTexture = texture; }
+        public void SetShootSound(SoundEffect sound) { m_ShootSound = sound; }
         private void SetTimer(int time)
         {
             m_Timer = new Timer(time);
@@ -45,6 +51,7 @@ namespace SpaceShooter.Gameplay.Enemies
 
             m_Graphics = graphics;
             m_Player = player;
+            m_LastState = Game1.GetGameState();
 
             SetTimer(time);
         }
@@ -52,18 +59,20 @@ namespace SpaceShooter.Gameplay.Enemies
         {
             Vector2 pos = GetRandomPosition();
 
-            if (m_KillCount >= m_Level * 10)
+            if (m_Player.GetKills() >= m_Level)
             {
                 m_Level++;
-                m_KillCount = 0;
+                m_Player.SetKillCount(0);
             }
 
-            if (m_EnemyList.Count < 7)
+            if (m_EnemyList.Count < m_Level)
             {
                 //Spawn
                 m_EnemyList.Add(new Enemy(pos, 0, 1, m_EnemyTexture, 4, new Rectangle((int)pos.X, (int)pos.Y - 50, m_EnemyTexture.Width, m_EnemyTexture.Height), m_Graphics, m_EmptyTexture));
                 m_EnemyList[m_EnemyList.Count - 1].LoadTextureData();
                 m_EnemyList[m_EnemyList.Count - 1].SetBulletTexture(m_BulletTexture);
+                m_EnemyList[m_EnemyList.Count - 1].SetShootSound(m_ShootSound);
+                m_EnemyList[m_EnemyList.Count - 1].SetBulletDamage(m_Level * 10);
             }
             m_Timer.Enabled = false;
             m_Timer.Dispose();
@@ -76,6 +85,23 @@ namespace SpaceShooter.Gameplay.Enemies
             int Y = m_Random.Next((int)m_Player.GetPosition().Y - 1000, (int)m_Player.GetPosition().Y + 1000);
 
             return new Vector2(X, Y);
+        }
+        public void Update()
+        {
+            if (m_LastState != Game1.GetGameState())
+            {
+                if (Game1.GetGameState() == EGameState.eGS_GameOver || Game1.GetGameState() == EGameState.eGS_Menu || Game1.GetGameState() == EGameState.eGS_Paused)
+                {
+                    m_Paused = true;
+                    m_LastState = Game1.GetGameState();
+                }
+                else
+                {
+                    m_Paused = false;
+                    m_LastState = Game1.GetGameState();
+                    SetTimer(2000);
+                }
+            }
         }
     }
 }       

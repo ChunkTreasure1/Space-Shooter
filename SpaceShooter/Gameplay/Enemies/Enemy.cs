@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Audio;
 
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,8 @@ namespace SpaceShooter.Gameplay.Enemies
 
         private int m_KillScore = 10;
         private EState m_State;
+        private SoundEffect m_ShootSound;
+        private float m_BulletDamage = 30f;
 
         //Getting
         public List<Bullet> GetBullets() { return m_Bullets; }
@@ -39,6 +42,8 @@ namespace SpaceShooter.Gameplay.Enemies
         public void SetBulletTexture(Texture2D texture) { m_BulletTexture = texture; }
         public void SetHealth(float health) { m_Health = health; }
         public void SetKillScore(int i) { m_KillScore = i; }
+        public void SetShootSound(SoundEffect sound) { m_ShootSound = sound; }
+        public void SetBulletDamage(float amount) { m_BulletDamage = amount; }
 
         public Enemy(Vector2 pos, float rotation, float scale, Texture2D texture, float speed, Rectangle rect, GraphicsDeviceManager graphics, Texture2D emptyTexture) :
             base(pos, rotation, scale, texture, rect, graphics)
@@ -135,11 +140,13 @@ namespace SpaceShooter.Gameplay.Enemies
 
         private void Shoot()
         {
+            m_ShootSound.Play();
             GetBullets().Add(new Bullet(new Vector2(GetPosition().X, GetPosition().Y),
                 GetRotation(), 0.5f, m_BulletTexture, 10f, new Rectangle((int)GetPosition().X, (int)GetPosition().Y, m_BulletTexture.Width, m_BulletTexture.Height),
                 m_Graphics));
 
             GetBullets()[GetBullets().Count - 1].LoadTextureData();
+            GetBullets()[GetBullets().Count - 1].SetDamage(m_BulletDamage);
         }
 
         private void SetTimer(int time)

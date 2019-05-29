@@ -14,6 +14,7 @@ namespace SpaceShooter.Gameplay
         Player.Player m_Player;
         int m_Time;
         List<HealthPickup> m_HealthPickups = new List<HealthPickup>();
+        List<AmmoPickup> m_AmmoPickups = new List<AmmoPickup>();
         Timer m_Timer;
 
         Texture2D m_HealthTexture;
@@ -31,6 +32,7 @@ namespace SpaceShooter.Gameplay
         public void SetAmmoTexture(Texture2D texture) { m_AmmoTexture = texture; }
 
         public List<HealthPickup> GetHealthPickups() { return m_HealthPickups; }
+        public List<AmmoPickup> GetAmmoPickups() { return m_AmmoPickups; }
 
         public Spawner(Player.Player player, int time, GraphicsDeviceManager graphics)
         {
@@ -51,6 +53,10 @@ namespace SpaceShooter.Gameplay
             Vector2 pos = GetRandomPosition();
             m_HealthPickups.Add(new HealthPickup(pos, m_HealthTexture, new Rectangle((int)pos.X, (int)pos.Y, m_HealthTexture.Width, m_HealthTexture.Height), m_Graphics));
             m_HealthPickups[m_HealthPickups.Count - 1].LoadTextureData();
+
+            pos = GetRandomPosition();
+            m_AmmoPickups.Add(new AmmoPickup(pos, m_AmmoTexture, new Rectangle((int)pos.X, (int)pos.Y, m_AmmoTexture.Width, m_AmmoTexture.Height), m_Graphics));
+            m_AmmoPickups[m_AmmoPickups.Count - 1].LoadTextureData();
         }
 
         private Vector2 GetRandomPosition()

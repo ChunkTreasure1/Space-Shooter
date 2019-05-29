@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
 
 using System.Collections.Generic;
 using System;
@@ -26,6 +27,10 @@ namespace SpaceShooter.Gameplay.Player
 
         private int m_KillCount = 0;
         private int m_Score = 0;
+        private int m_CurrentAmmo = 50;
+        private int m_MaxAmmo = 50;
+
+        private SoundEffect m_ShootSound;
 
         //Getting
         public List<Bullet> GetBullets() { return m_Bullets; }
@@ -34,6 +39,8 @@ namespace SpaceShooter.Gameplay.Player
         public float GetMaxHealth() { return m_MaxHealth; }
         public int GetKills() { return m_KillCount; }
         public int GetScore() { return m_Score; }
+        public int GetCurrentAmmo() { return m_CurrentAmmo; }
+        public int GetMaxAmmo() { return m_MaxAmmo; }
 
         //Setting
         public override void SetPosition(Vector2 pos)
@@ -51,6 +58,8 @@ namespace SpaceShooter.Gameplay.Player
         public void SetEmptyTexture(Texture2D texture) { m_EmptyTexture = texture; }
         public void SetKillCount(int i) { m_KillCount = i; }
         public void SetScore(int i) { m_Score = i; }
+        public void SetCurrentAmmo(int ammo) { m_CurrentAmmo = ammo; }
+        public void SetShootSound(SoundEffect shoot) { m_ShootSound = shoot; }
 
         public Player(Vector2 pos, float rotation, float scale, Texture2D texture, Rectangle rect, GraphicsDeviceManager graphics, float maxSpeed, Camera2D camera) :
             base(pos, rotation, scale, texture, rect, graphics)
@@ -163,12 +172,19 @@ namespace SpaceShooter.Gameplay.Player
                     rotation = GetRotation() - MathHelper.ToRadians(180);
                 }
                 m_ShootPressed = true;
-                GetBullets().Add(new Bullet(new Vector2(GetPosition().X, GetPosition().Y),
-                    rotation, 0.5f, m_BulletTexture, 10f,
-                    new Rectangle((int)GetPosition().X, (int)GetPosition().Y, m_BulletTexture.Width, m_BulletTexture.Height),
-                    m_Graphics));
 
-                GetBullets()[GetBullets().Count - 1].LoadTextureData();
+                if (GetCurrentAmmo() > 0)
+                {
+                    m_ShootSound.Play();
+                    GetBullets().Add(new Bullet(new Vector2(GetPosition().X, GetPosition().Y),
+                        rotation, 0.5f, m_BulletTexture, 10f,
+                        new Rectangle((int)GetPosition().X, (int)GetPosition().Y, m_BulletTexture.Width, m_BulletTexture.Height),
+                        m_Graphics));
+
+                    GetBullets()[GetBullets().Count - 1].LoadTextureData();
+                    GetBullets()[GetBullets().Count - 1].SetDamage(50f);
+                    SetCurrentAmmo(GetCurrentAmmo() - 1);
+                }
             }
             if (Keyboard.GetState().IsKeyUp(Keys.Space) && m_ShootPressed)
             {

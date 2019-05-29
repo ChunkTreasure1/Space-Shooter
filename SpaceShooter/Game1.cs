@@ -15,7 +15,7 @@ namespace SpaceShooter
     /// This is the main type for your game.
     /// </summary>
 
-    enum EGameState
+    public enum EGameState
     {
         eGS_Menu,
         eGS_Playing,
@@ -38,7 +38,7 @@ namespace SpaceShooter
         private bool m_EscPushed = false;
 
         private SpriteFont m_Font;
-        private EGameState m_GameState;
+        private static EGameState m_GameState;
         private Camera2D m_Camera;
 
         private EnemySpawner m_EnemySpawner;
@@ -54,6 +54,8 @@ namespace SpaceShooter
 
         private SoundEffect m_ExplosionSound;
         private Background m_Background;
+
+        public static EGameState GetGameState() { return m_GameState; }
 
         public Game1()
         {
@@ -116,6 +118,7 @@ namespace SpaceShooter
             m_EnemySpawner.SetBulletTexture(bullet);
 
             m_Spawner.SetHealthTexture(Content.Load<Texture2D>("Images/health"));
+            m_Spawner.SetAmmoTexture(Content.Load<Texture2D>("Images/Ammo"));
             m_Asteroid = Content.Load<Texture2D>("Images/Asteroid");
             m_Explosion = Content.Load<Texture2D>("Images/explosion");
 
@@ -124,6 +127,8 @@ namespace SpaceShooter
 
             //Audio
             m_ExplosionSound = Content.Load<SoundEffect>("Audio/explosionSound");
+            m_Player.SetShootSound(Content.Load<SoundEffect>("Audio/shoot"));
+            m_EnemySpawner.SetShootSound(Content.Load<SoundEffect>("Audio/shoot"));
 
             //Fonts
             m_Font = Content.Load<SpriteFont>("Fonts/Roboto");
@@ -155,6 +160,9 @@ namespace SpaceShooter
         {
             GetInput(gameTime);
 
+            //Update enemy spawner
+            m_EnemySpawner.Update();
+
             if (m_GameState == EGameState.eGS_Paused || m_GameState == EGameState.eGS_GameOver || m_GameState == EGameState.eGS_Menu)
             {
                 return;
@@ -175,17 +183,25 @@ namespace SpaceShooter
             GraphicsDevice.Clear(Color.Black);
 
             m_SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, null, null, null, null, m_Camera.GetTransform());
-            m_Background.Draw(ref m_SpriteBatch);
 
+            //Draw the menu if it's in the menu
+            if (m_GameState == EGameState.eGS_Menu)
+            {
+
+            }
+
+            m_Background.Draw(ref m_SpriteBatch);
 
             Vector2 middlePos = TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width / 2 - 50, GraphicsDevice.DisplayMode.Height / 2));
             if (m_GameState == EGameState.eGS_Paused)
             {
                 m_SpriteBatch.DrawString(m_Font, "PAUSED", middlePos, Color.White);
+                return;
             }
             else if (m_GameState == EGameState.eGS_GameOver)
             {
                 m_SpriteBatch.DrawString(m_Font, "GAME OVER", middlePos, Color.White);
+                return;
             }
 
             if (m_Enemies.Count > 0)
@@ -217,9 +233,11 @@ namespace SpaceShooter
                 }
             }
 
+            //Draw UI
             m_SpriteBatch.DrawString(m_Font, "FPS: " + 1 / (float)gameTime.ElapsedGameTime.TotalSeconds, TransformVector(new Vector2(100, 100)), Color.White);
             m_SpriteBatch.DrawString(m_Font, "Score: " + m_Player.GetScore(), TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width - 200, 100)), Color.White);
             m_SpriteBatch.DrawString(m_Font, "Level: " + m_EnemySpawner.GetLevel(), TransformVector(new Vector2(GraphicsDevice.DisplayMode.Width - 200, 150)), Color.White);
+            m_SpriteBatch.DrawString(m_Font, "Ammo: " + m_Player.GetCurrentAmmo(), TransformVector(new Vector2(100, GraphicsDevice.DisplayMode.Height - 100)), Color.White);
 
             //Draw the player
             m_Player.Draw(ref m_SpriteBatch);
@@ -304,15 +322,6 @@ namespace SpaceShooter
                 }
             }
 
-            //Update Health pickups
-            if (m_Spawner.GetHealthPickups().Count > 0)
-            {
-                for (int i = 0; i < m_Spawner.GetHealthPickups().Count; i++)
-                {
-                    m_Spawner.GetHealthPickups()[i].Update();
-                }
-            }
-
             //Update explosions
             if (m_Explosions.Count > 0)
             {
@@ -370,7 +379,7 @@ namespace SpaceShooter
                     {
                         i = 0;
                     }
-                    if (m_Asteroids.Count == 0)
+                    if (m_Asteroids.Count == 0 || m_Player.GetBullets().Count == 0)
                     {
                         break;
                     }
@@ -431,7 +440,7 @@ namespace SpaceShooter
             {
                 if (IntersectsPixel(m_Player.GetRectangle(), m_Player.GetTextureData(), m_Asteroids[i].GetRectangle(), m_Asteroids[i].GetTextureData()))
                 {
-                    m_Player.SetHealth(m_Player.GetHealth() - 10f);
+                    m_Player.SetHealth(m_Player.GetHealth() - 1f);
                     if (m_Player.GetHealth() <= 0)
                     {
                         m_GameState = EGameState.eGS_GameOver;
@@ -446,6 +455,17 @@ namespace SpaceShooter
                 {
                     m_Spawner.GetHealthPickups()[i].Use(m_Player);
                     m_Spawner.GetHealthPickups().RemoveAt(i);
+                    i--;
+                }
+            }
+
+            //Check for ammo collision
+            for (int i = 0; i < m_Spawner.GetAmmoPickups().Count; i++)
+            {
+                if (IntersectsPixel(m_Player.GetRectangle(), m_Player.GetTextureData(), m_Spawner.GetAmmoPickups()[i].GetRectangle(), m_Spawner.GetAmmoPickups()[i].GetTextureData()))
+                {
+                    m_Spawner.GetAmmoPickups()[i].Use(m_Player);
+                    m_Spawner.GetAmmoPickups().RemoveAt(i);
                     i--;
                 }
             }

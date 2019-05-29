@@ -8,16 +8,19 @@ namespace SpaceShooter.Gameplay.Enemies
     class EnemySpawner
     {
         //Private vars
-        int m_Level;
-        int m_Time;
-        int m_KillCount = 0;
-        List<Enemy> m_EnemyList;
-        Timer m_Timer;
+        private int m_Level;
+        private int m_Time;
+        private int m_KillCount = 0;
+        private List<Enemy> m_EnemyList;
+        private Timer m_Timer;
 
-        Texture2D m_EnemyTexture;
-        Texture2D m_BulletTexture;
-        Texture2D m_EmptyTexture;
-        GraphicsDeviceManager m_Graphics;
+        private Texture2D m_EnemyTexture;
+        private Texture2D m_BulletTexture;
+        private Texture2D m_EmptyTexture;
+        private GraphicsDeviceManager m_Graphics;
+
+        private Player.Player m_Player;
+        private Random m_Random = new Random();
 
         //Getting
         public int GetLevel() { return m_Level; }
@@ -34,17 +37,18 @@ namespace SpaceShooter.Gameplay.Enemies
             m_Timer.Enabled = true;
         }
 
-        public EnemySpawner(ref List<Enemy> enemies, int time, GraphicsDeviceManager graphics)
+        public EnemySpawner(ref List<Enemy> enemies, int time, GraphicsDeviceManager graphics, Player.Player player)
         {
             m_EnemyList = enemies;
             m_Level = 1;
             m_Time = time;
 
             m_Graphics = graphics;
+            m_Player = player;
 
             SetTimer(time);
         }
-        private void OnTimerEnd(Object source, ElapsedEventArgs e)
+        private void OnTimerEnd(Object source, ElapsedEventArgs e)  
         {
             Vector2 pos = GetRandomPosition();
 
@@ -66,15 +70,12 @@ namespace SpaceShooter.Gameplay.Enemies
 
             SetTimer(m_Time);
         }
-
         private Vector2 GetRandomPosition()
         {
-            Random random = new Random();
-
-            int X = 2000;
-            int Y = random.Next(0, 1100);
+            int X = m_Random.Next((int)m_Player.GetPosition().X - 1000, (int)m_Player.GetPosition().X + 1000);
+            int Y = m_Random.Next((int)m_Player.GetPosition().Y - 1000, (int)m_Player.GetPosition().Y + 1000);
 
             return new Vector2(X, Y);
         }
     }
-}
+}       

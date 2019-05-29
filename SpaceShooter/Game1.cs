@@ -81,7 +81,7 @@ namespace SpaceShooter
             m_Player = new Player(new Vector2(100, 100), 0, 1f, null, new Rectangle(0, 0, 0, 0), m_Graphics, 10, m_Camera);
             m_LastAsteroidCreation = m_Player.GetPosition();
 
-            m_EnemySpawner = new EnemySpawner(ref m_Enemies, 2000, m_Graphics);
+            m_EnemySpawner = new EnemySpawner(ref m_Enemies, 2000, m_Graphics, m_Player);
             m_Spawner = new Spawner(m_Player, 10000, m_Graphics);
 
             base.Initialize();
@@ -311,6 +311,29 @@ namespace SpaceShooter
                     else
                     {
                         m_Collision = false;
+                    }
+                }
+
+                for (int j = 0; j < m_Asteroids.Count; j++)
+                {
+                    if (i < 0)
+                    {
+                        i = 0;
+                    }
+                    if (IntersectsPixel(m_Player.GetBullets()[i].GetRectangle(), m_Player.GetBullets()[i].GetTextureData(), m_Asteroids[j].GetRectangle(), m_Asteroids[j].GetTextureData()))
+                    {
+                        m_Player.GetBullets().RemoveAt(i);
+                        m_Asteroids.RemoveAt(j);
+
+                        if (m_Player.GetBullets().Count < 1 || m_Asteroids.Count < 1)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            i--;
+                            j--;
+                        }
                     }
                 }
             }

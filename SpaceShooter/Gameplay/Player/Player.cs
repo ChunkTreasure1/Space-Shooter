@@ -61,6 +61,7 @@ namespace SpaceShooter.Gameplay.Player
         public void SetCurrentAmmo(int ammo) { m_CurrentAmmo = ammo; }
         public void SetShootSound(SoundEffect shoot) { m_ShootSound = shoot; }
 
+        //Constructor sets the start values
         public Player(Vector2 pos, float rotation, float scale, Texture2D texture, Rectangle rect, GraphicsDeviceManager graphics, float maxSpeed, Camera2D camera) :
             base(pos, rotation, scale, texture, rect, graphics)
         {
@@ -85,8 +86,10 @@ namespace SpaceShooter.Gameplay.Player
             Rectangle rect = new Rectangle(0, 0, m_Texture.Width, m_Texture.Height);
             Vector2 origin = new Vector2(m_Texture.Width / 2, m_Texture.Height / 2);
 
+            //Draw the player
             spriteBatch.Draw(m_Texture, m_Position, rect, Color.White, m_Rotation + MathHelper.ToRadians(90), origin, m_Scale, SpriteEffects.None, 0);
 
+            //Draws the health bar in different colors depending on health value
             if (m_Health > m_MaxHealth / 2)
             {
                 spriteBatch.Draw(m_EmptyTexture, new Rectangle((int)m_Position.X - 50, (int)m_Position.Y + m_Texture.Height, (int)(m_Texture.Width * (m_Health / m_MaxHealth)), m_EmptyTexture.Height + 10), Color.Green);
@@ -99,6 +102,8 @@ namespace SpaceShooter.Gameplay.Player
             {
                 spriteBatch.Draw(m_EmptyTexture, new Rectangle((int)m_Position.X - 50, (int)m_Position.Y + m_Texture.Height, (int)(m_Texture.Width * (m_Health / m_MaxHealth)), m_EmptyTexture.Height + 10), Color.Red);
             }
+
+            //Draw the bullets
             if (m_Bullets.Count > 0)
             {
                 for (int i = 0; i < m_Bullets.Count; i++)
@@ -107,12 +112,16 @@ namespace SpaceShooter.Gameplay.Player
                 }
             }
         }
+
+        //Moves the player
         public override void Move(float speed, float mul)
         {
+            //Get the direction it should move in
             Vector2 dir = new Vector2((float)Math.Cos(GetRotation()),
                           (float)Math.Sin(GetRotation()));
             dir.Normalize();
 
+            //Add to the speed or remove from it
             if (m_CurrentSpeed <= m_MaxSpeed)
             {
                 m_CurrentSpeed += speed;
@@ -122,25 +131,39 @@ namespace SpaceShooter.Gameplay.Player
                 m_CurrentSpeed -= speed;
             }
 
+            //Set thep players position
             SetPosition(GetPosition() + dir * m_CurrentSpeed * mul);
-            Vector2 pos = GetPosition();
 
-            Vector2 movePosLeft = Vector2.Transform(new Vector2(m_Graphics.PreferredBackBufferWidth / 7 * 6, m_Graphics.PreferredBackBufferHeight / 6 * 6), Matrix.Invert(m_Camera.GetTransform()));
+            //Set the posistions at which the camera should start moving
+            Vector2 movePosLeft = Vector2.Transform(new Vector2(m_Graphics.PreferredBackBufferWidth / 7 * 6, m_Graphics.PreferredBackBufferHeight / 7 * 6), Matrix.Invert(m_Camera.GetTransform()));
             Vector2 movePosRight = Vector2.Transform(new Vector2(m_Graphics.PreferredBackBufferWidth / 7, m_Graphics.PreferredBackBufferHeight / 7), Matrix.Invert(m_Camera.GetTransform()));
+
+            //If the player reaches any of these positions, move the camera
             if (m_Position.X > movePosLeft.X || m_Position.X < movePosRight.X || m_Position.Y < movePosRight.Y || m_Position.Y > movePosLeft.Y)
             {
                 m_Camera.Move(dir * m_CurrentSpeed);
             }
             base.Move(speed, mul);
         }
+
+        //Updates the player
         public override void Update(GameTime gameTime)
         {
+            //Get the player input and set the rectangle
             GetInput();
             m_Rectangle = new Rectangle((int)m_Position.X, (int)m_Position.Y, m_Texture.Width, m_Texture.Height);
             base.Update(gameTime);
         }
+
+        //Gets the input for the player
         private void GetInput()
         {
+            /*
+             * Moves the player
+             * Rotates the player
+             * Shoots
+             * Changes shooting direction
+             */
             if (Keyboard.GetState().IsKeyDown(Keys.W))
             {
                 m_MaxSpeed = 10;

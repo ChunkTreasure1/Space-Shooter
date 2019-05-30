@@ -32,7 +32,6 @@ namespace SpaceShooter.Gameplay
         }
         public void SetTexture(Texture2D texture) { m_Texture = texture; }
         public void SetRotation(float rot) { m_Rotation = MathHelper.ToRadians(rot); }
-
         public void SetRectangle(Rectangle rect) { m_Rectangle = rect; }
 
         //Methods

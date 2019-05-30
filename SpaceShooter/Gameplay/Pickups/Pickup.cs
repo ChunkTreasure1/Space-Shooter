@@ -5,6 +5,7 @@ namespace SpaceShooter.Gameplay
 {
     public class Pickup
     {
+        //Member vars
         protected Vector2 m_Position;
         protected Texture2D m_Texture;
         protected Rectangle m_Rectangle;
@@ -43,6 +44,8 @@ namespace SpaceShooter.Gameplay
 
             m_Graphics = graphics;
         }
+
+        //Draws the pickup if the draw method isn't overridden
         public virtual void Draw(ref SpriteBatch spriteBatch)
         {
             Rectangle rect = new Rectangle(0, 0, m_Texture.Width, m_Texture.Height);
@@ -50,14 +53,13 @@ namespace SpaceShooter.Gameplay
 
             spriteBatch.Draw(m_Texture, m_Position, rect, Color.White, m_Rotation, origin, 1, SpriteEffects.None, 1);
         }
-
-        public virtual void Update()
-        {
-        }
-
+        
+        //Loads the texture data of the pickup(used for collision)
         public void LoadTextureData()
         {
+            //Create an array of colors using the texture size
             m_TextureData = new Color[m_Texture.Width * m_Texture.Height];
+            //Fill the array using data from the texture
             m_Texture.GetData(m_TextureData);
         }
     }

@@ -3,64 +3,54 @@ using System;
 
 public class Camera2D
 {
+    private float m_Zoom;
+    private Vector2 m_Position;
+    private float m_Rotation;
+    private Vector2 m_Origin;
+    
+    private int m_Height = 0;
+    private int m_Width = 0;
+    private Matrix m_Mat;
+
+    //Getting
+    public float GetZoom() { return m_Zoom; }
+    public float GetRotation() { return m_Rotation; }
+    public Vector2 GetPosition() { return m_Position; }
+    public Vector2 GetOrigin() { return m_Origin; }
+    public Matrix GetTransform()
+    {
+        Matrix transform = Matrix.CreateTranslation(new Vector3(-m_Position.X, -m_Position.Y, 0)) *
+            Matrix.CreateRotationZ(m_Rotation) *
+            Matrix.CreateScale(new Vector3(m_Zoom, m_Zoom, 1)) *
+            Matrix.CreateTranslation(new Vector3(m_Width * 0.5f, m_Height * 0.5f, 0));
+        return transform;
+    }
+
+    //Setting
+    public void SetPosition(Vector2 pos) { m_Position = pos; }
+    public void SetRotation(float rot) { m_Rotation = rot; }
+
+    //Constructor sets all the star values
     public Camera2D(int width, int height)
     {
-        Zoom = 1;
-        Position = Vector2.Zero;
-        Rotation = 0;
-        Origin = Vector2.Zero;
-        Position = Vector2.Zero;
+        m_Zoom = 1;
+        m_Position = Vector2.Zero;
+        m_Rotation = 0;
+        m_Origin = Vector2.Zero;
+        m_Position = Vector2.Zero;
 
         m_Width = width;
         m_Height = height;
         m_Mat = GetTransform();
     }
 
-    public float Zoom { get; set; }
-    public Vector2 Position { get; set; }
-    public float Rotation { get; set; }
-    public Vector2 Origin { get; set; }
-    
-    private int m_Height = 0;
-    private int m_Width = 0;
-    private Matrix m_Mat;
-
+    //Moves the camera in desired direction
     public void Move(Vector2 direction)
     {
-        Position += direction;
+        //Move the camera using the direction and update the matrix
+        m_Position += direction;
         m_Mat = GetTransform();
-        Console.WriteLine(Position.X.ToString() + ", " + Position.Y.ToString());
     }
 
-    public Matrix GetTransform()
-    {
-        Matrix transform = Matrix.CreateTranslation(new Vector3(-Position.X, -Position.Y, 0)) *
-            Matrix.CreateRotationZ(Rotation) *
-            Matrix.CreateScale(new Vector3(Zoom, Zoom, 1)) *
-            Matrix.CreateTranslation(new Vector3(m_Width * 0.5f, m_Height * 0.5f, 0));
-        return transform;
-    }
-
-    public Vector2 ScreenToWorldCoords(Vector2 screenCords)
-    {
-        //Invert the Y value
-        screenCords.Y = m_Height - screenCords.Y;
-
-        //Change origo pos anfd fix scaling
-        screenCords -= new Vector2(m_Width / 2, m_Height / 2);
-        screenCords /= Zoom;
-
-        //Translate with the camera
-        screenCords += Position;
-
-        return screenCords;
-    }
-
-    public Vector2 WorldToScreenCoords(ref Vector2 worldCoords)
-    {
-        Vector2 vec;
-        Vector2.Transform(ref worldCoords, ref m_Mat, out vec);
-
-        return vec;
-    }
+    //Returns the full transform matrix of the camera
 }
